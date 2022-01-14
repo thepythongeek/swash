@@ -1,0 +1,336 @@
+ {  
+  "POST: http://trueapps.org/swash/apis/get_themes.php": {
+    "competition_type": "",
+
+    "[response]": {
+      "success": "",
+      "themes": "",
+      "message": ""
+    }
+  },
+
+  "GET: http://trueapps.org/swash/apis/get_schools.php": {
+
+    "[response]": {
+      "success": "",
+      "schools": "",
+      "message": ""
+    }
+  },
+
+  "GET: http://trueapps.org/swash/apis/get_competition.php": {
+    "success":true,
+    "competitions":[
+      {
+        "id": "",
+        "name": "",
+        "competition_type": "",
+        "status": ""
+      }
+    ],
+    "message":""
+  },
+
+  "GET: http://trueapps.org/swash/apis/get_posts.php": {
+    "success": "bool",
+    "message": "",
+    "posts":[
+      {"id": "",
+        "name": "",
+        "is_expert": "",
+        "profile_pic": "",
+        "title": "",
+        "content": "",
+        "image_link": "",
+        "comment_status": "",
+        "comments":
+          [
+            {
+              "name": "",
+              "review": "",
+              "created_at": ""
+            }
+          ]
+      }
+    ]
+  },
+
+  "GET: http://trueapps.org/swash/apis/get_league_table.php": {
+    "success": "bool",
+    "message": "",
+    "schools": []
+  },
+
+  "POST: http://trueapps.org/swash/apis/get_images_to_vote.php": {
+    "user_id": "",
+
+    "[response]": {
+      "success": "bool",
+      "competition_id": "",
+      "competition_name": "",
+      "competition_status": "",
+      "competition_theme": "",
+      "images":[
+        {
+          "id":"",
+          "url":"",
+          "voted": "bool"
+        }
+      ],
+      "message":"",
+      "competition_caption":""
+    }
+  },
+
+  "GET: http://trueapps.org/swash/apis/get_all_wards.php": {
+    "success": "bool",
+    "wards":[
+      {
+        "id":"",
+        "user_id": "",
+        "name":""
+      }
+    ],
+    "message":""
+  },
+
+  "POST: http://trueapps.org/swash/apis/get_comments.php": {
+    "image_id": "",
+
+    "[response]": {
+      "success": true,
+      "comments": []
+    }
+  },
+
+  "GET: http://trueapps.org/swash/apis/get_categories.php": {
+    "message": "",
+    "success": "bool",
+    "categories":[
+      {
+        "id": "",
+        "name":""
+      }
+    ]
+  },
+  
+  "GET: http://trueapps.org/swash/apis/enviromental_status.php": {
+    "success": "bool",
+    "eas":[
+      {
+        "id": "",
+        "user_id": "",
+        "location_name": "",
+        "longitude": "",
+        "latitude": "",
+        "description": "",
+        "image_url": "",
+        "times_reported": "",
+        "status": "",
+        "updated_at": ""
+      }
+    ],
+    "message":""
+  },
+
+  "GET: http://trueapps.org/swash/apis/check_active_competitions.php": {
+    "success": "bool",
+    "active_competitions ": "bool",
+    "message": ""
+  },
+
+
+  "POST: http://trueapps.org/swash/apis/change_password.php": {
+    "user_id": "",
+    "password": ""
+  },
+
+
+  "POST: http://trueapps.org/swash/apis/comment.php" : {
+    "user_id": "",
+    "comment": "",
+    "image_id": ""
+  },
+
+  "POST: http://trueapps.org/swash/apis/email_check.php": {
+    "email": "",
+    "security_code": ""
+  },
+
+  "POST: http://trueapps.org/swash/apis/get_profile.php": {
+    "user_id": "",
+
+    "[response]": {
+      "success": "bool",
+      "profile" : {
+        "id": "",
+        "bio": "",
+        "name": "",
+        "ward": "",
+        "email": "",
+        "gender": "",
+        "school": "",
+        "role_id": "",
+        "location": "",
+        "is_expert": "",
+        "profile_pic": "",
+        "category_name": "",
+        "ambassador_level": ""
+      }
+    }
+  },
+
+  
+  "POST: http://trueapps.org/swash/apis/get_competition_details.php": {
+    "competition_id": "",
+    "school_id": "",
+
+    "[respnse]": {
+      "success": "bool",
+      "is_subscribed": "bool",
+      "no_subscribed": "",
+      "total_images": "",
+      "images": []
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/vote.php": {
+    "vote": "",
+    "user_id": "",
+    "image_id": "",
+
+    "[response]" : {
+      "success": "bool",
+      "message": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/post_comment.php": {
+    "user_id": "",
+    "post_id": "",
+    "comment": "",
+
+    "[response]": {
+      "success": "",
+      "message": "",
+      "user_name": "",
+      "created_at": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/signin.php": {
+    "email": "",
+    "password": "",
+    "user_type": "",
+    "player_id": "",
+
+    "[response]": {
+      "success": "bool",
+      "user_id": "",
+      "role_id": "",
+      "ward_id": "",
+      "message": "",
+      "school_id": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/register.php": {
+    "phone": "",
+    "email": "",
+    "location": "",
+    "password": "",
+    "user_type": "",
+    "full_name": "",
+    "school_id": "",
+    "player_id": "",
+
+    "[response]": {
+      "success": "",
+      "userId": "",
+      "roleId": "",
+      "message": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/upload_dp.php": {
+    "user_id": "",
+    "profile_photo": "",
+
+    "[response]" : {
+      "success": "bool",
+      "message": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/report_eas.php": {
+    "alert_id": ""
+  },
+
+  "POST: http://trueapps.org/swash/apis/upload_photo.php": {
+    "image": "",
+    "school_id": "",
+    "qn_one_ans": "",
+    "qn_two_ans": "",
+    "competition_id": "",
+
+    "[response]" : {
+      "success": "bool",
+      "message": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/set_category.php": {
+    "user_id": "",
+    "action": "",
+    "category_id": ""
+  },
+
+  "POST: http://trueapps.org/swash/apis/search_people.php": {
+    "keyword": "",
+
+    "[response]" : {
+      "success": "bool",
+      "message": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/new_env_status.php": {
+    "image": "",
+    "status": "",
+    "user_id": "",
+    "latitude": "",
+    "longitude": "",
+    "description": "",
+    "location_name": ""
+  },
+
+  "POST: http://trueapps.org/swash/apis/get_top_voters.php": {
+    "comp_id": "",
+
+    "[response]" : {
+      "voters": "",
+      "success": "",
+      "message": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/security_code_check.php": {
+    "user_id": "",
+    "security_code": "",
+
+    "[response]" : {
+      "success": "bool",
+      "message": ""
+    }
+  },
+
+  "POST: http://trueapps.org/swash/apis/subscribe_competition.php": {
+    "school_id": "",
+    "competition_id": "",
+
+    "[response]" : {
+      "success": "success",
+      "message": "isValid"
+    }
+  }
+ }
