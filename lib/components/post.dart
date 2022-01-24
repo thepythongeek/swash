@@ -43,7 +43,7 @@ class _PostState extends State<Post> {
         Provider.of<AppStateManager>(context, listen: false);
     final Postmanager postmanager =
         Provider.of<Postmanager>(context, listen: false);
-    print(widget.post);
+    print(widget.post.imageLink);
 
     return FocusDetector(
         onVisibilityGained: () {
@@ -120,7 +120,7 @@ class _PostState extends State<Post> {
                         child: widget.post.mediaType == 'video' //&& _play
                             ? MediaPlayer(fileUrl: widget.post.imageLink)
                             : Image.network(
-                                widget.post.imageLink.startsWith('https')
+                                widget.post.imageLink.startsWith('http')
                                     ? widget.post.imageLink
                                     : '${AppPath.domain}/${widget.post.imageLink}',
                                 errorBuilder: (context, object, stacktrace) {

@@ -42,7 +42,7 @@ class _SplashScreenState extends State<SplashScreen> {
     FlutterSecureStorage storage = FlutterSecureStorage();
     Map<String, String> keys = await storage.readAll();
     if (keys.isEmpty) {
-      Timer(const Duration(seconds: 10), () {
+      Timer(const Duration(seconds: 1), () {
         Provider.of<AppStateManager>(context, listen: false).initiliase();
         Provider.of<AppStateManager>(context, listen: false)
             .goto(MyPages.home, true);

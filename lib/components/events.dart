@@ -44,22 +44,15 @@ class Updates extends StatefulWidget {
 
 class _UpdatesState extends State<Updates> {
   List posts = [];
-  bool _loading = true;
+  late Future<GetPosts> _getPosts;
   late Future<GetThemes> _listOfThemes;
 
   @override
   void initState() {
     print(Provider.of<ProfileManager>(context, listen: false).user!.role);
     super.initState();
-    setState(() {
-      getPosts(context).then((value) {
-        setState(() {
-          _loading = false;
-          posts = value.posts;
-        });
-      });
-      _listOfThemes = getThemes("all");
-    });
+    _getPosts = getPosts(context);
+    _listOfThemes = getThemes('all');
   }
 
   @override
@@ -72,97 +65,120 @@ class _UpdatesState extends State<Updates> {
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
+            print('9000');
             Provider.of<AppStateManager>(context, listen: false)
                 .goto(MyPages.eventform, true);
           },
         ),
-        body: ListView(children: [
-          const ListTile(
-            tileColor: Colors.white,
-            title: Text(
-              'Current Updates',
-              style: TextStyle(color: Colors.blue),
-            ),
-          ),
-          _loading
-              ? const Center(
+        body: FutureBuilder<GetPosts>(
+            future: _getPosts,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasData) {
+                  var posts = snapshot.data!.posts;
+                  return posts.isEmpty
+                      ? Center(
+                          child: availableCompetition(
+                              appStateManager, themeManager),
+                        )
+                      : ListView(children: [
+                          const ListTile(
+                            tileColor: Colors.white,
+                            title: Text(
+                              'Current Updates',
+                              style: TextStyle(color: Colors.blue),
+                            ),
+                          ),
+                          Consumer<Postmanager>(
+                              builder: (context, value, child) {
+                            if (value.onUpdate) {
+                              posts = posts
+                                  .where((element) =>
+                                      element.id != value.getFreshPost.id)
+                                  .toList();
+                              print(posts.length);
+                              posts.add(value.getFreshPost);
+                              //posts.add(value.getFreshPost);
+                              //value.resetUpdateEvent();
+                              return component.Post(post: posts[0]);
+                            } else {
+                              return component.Post(post: posts[0]);
+                            }
+                          }),
+                          availableCompetition(appStateManager, themeManager),
+                          Container(
+                            child: const ListTile(
+                              title: Text('Other Updates'),
+                              tileColor: Colors.white,
+                            ),
+                          ),
+                          Consumer<Postmanager>(
+                              builder: (context, value, child) {
+                            if (value.onUpdate) {
+                              value.resetUpdateEvent();
+                            }
+                            return ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, index) {
+                                return component.Post(post: posts[index + 1]);
+                              },
+                              itemCount: posts.length - 1,
+                            );
+                          })
+                        ]);
+                } else {
+                  return const Center(
+                    child: Text('Something went wrong please come back again'),
+                  );
+                }
+              } else {
+                return const Center(
                   child: CircularProgressIndicator(),
-                )
-              : Consumer<Postmanager>(builder: (context, value, child) {
-                  if (value.onUpdate) {
-                    posts = posts
-                        .where((element) => element.id != value.getFreshPost.id)
-                        .toList();
-                    print(posts.length);
-                    posts.add(value.getFreshPost);
-                    //posts.add(value.getFreshPost);
-                    //value.resetUpdateEvent();
-                    return component.Post(post: posts[0]);
-                  } else {
-                    return component.Post(post: posts[0]);
-                  }
-                }),
-          Card(
-            margin: const EdgeInsets.fromLTRB(10, 2, 10, 2),
-            child: Column(
-              children: [
-                Container(
-                  child: const ListTile(
-                    title: Text('Available Competitions'),
-                    tileColor: Colors.white,
-                  ),
-                  margin: const EdgeInsets.symmetric(vertical: 2),
-                ),
-                Container(
-                  margin: const EdgeInsets.only(top: 2.0),
-                  child: FutureBuilder<GetThemes>(
-                    future: _listOfThemes,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        List<Widget> children = [];
-                        var data = snapshot.data!.themes;
-                        if (data.isEmpty) {
-                          const Text('Data not found.');
-                        } else {
-                          for (int i = 0; i < data.length; i++) {
-                            children.add(thmesInfo(
-                                data[i], appStateManager, themeManager));
-                          }
-                        }
-                        return Column(children: children);
-                      } else {
-                        return const Text('Data not found.');
-                      }
-                    },
-                  ),
-                )
-              ],
-            ),
-          ),
+                );
+              }
+            }));
+  }
+
+  Card availableCompetition(
+      AppStateManager appStateManager, ThemeManager themeManager) {
+    return Card(
+      margin: const EdgeInsets.fromLTRB(10, 2, 10, 2),
+      child: Column(
+        children: [
           Container(
             child: const ListTile(
-              title: Text('Other Updates'),
+              title: Text('Available Competitions'),
               tileColor: Colors.white,
             ),
+            margin: const EdgeInsets.symmetric(vertical: 2),
           ),
-          _loading
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
-              : Consumer<Postmanager>(builder: (context, value, child) {
-                  if (value.onUpdate) {
-                    value.resetUpdateEvent();
+          Container(
+            margin: const EdgeInsets.only(top: 2.0),
+            child: FutureBuilder<GetThemes>(
+              future: _listOfThemes,
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  List<Widget> children = [];
+                  var data = snapshot.data!.themes;
+                  if (data.isEmpty) {
+                    const Text('Data not found.');
+                  } else {
+                    for (int i = 0; i < data.length; i++) {
+                      children.add(
+                          thmesInfo(data[i], appStateManager, themeManager));
+                    }
                   }
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) {
-                      return component.Post(post: posts[index + 1]);
-                    },
-                    itemCount: posts.length - 1,
-                  );
-                })
-        ]));
+                  return Column(children: children);
+                } else {
+                  return const Text('Data not found.');
+                }
+              },
+            ),
+          )
+        ],
+      ),
+    );
   }
 
   Widget thmesInfo(
@@ -175,6 +191,7 @@ class _UpdatesState extends State<Updates> {
         onPressed: () {
           // add theme
           themeManager.addTheme(Themes.fromMap(theme));
+          print(111);
           appStateManager.goto(MyPages.challenge, true);
         },
         child: Text(

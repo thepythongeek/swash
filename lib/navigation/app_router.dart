@@ -111,12 +111,12 @@ class RouteManager extends RouterDelegate
           if (appStateManager.navigation.login && !profileManager.isLoggedIn)
             LoginPage.page(),
           if (appStateManager.navigation.community &&
+              profileManager.user != null &&
               roles.contains(profileManager.user!.role))
             Community.page(),
-          if (appStateManager.navigation.toeventform &&
-              roles.contains(profileManager.user!.role))
-            EventForm.page(),
+
           if (appStateManager.navigation.envDetails &&
+              profileManager.user != null &&
               roles.contains(profileManager.user!.role))
             EnvironmentDetails.page(),
           if (appStateManager.navigation.school &&
@@ -126,6 +126,11 @@ class RouteManager extends RouterDelegate
           if (appStateManager.navigation.ward &&
               profileManager.user!.role == 'ward')
             Ward.page(),
+          if (appStateManager.navigation.toeventform &&
+              profileManager.user != null //&&
+          // roles.contains(profileManager.user!.role)
+          )
+            EventForm.page(),
           // if (appStateManager.navigation.survey) Survey.page(),
           if (appStateManager.navigation.schoolForm)
             school.SchoolForm.page(postmanager.getPost),

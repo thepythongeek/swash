@@ -34,7 +34,9 @@ Future postEvent(
 
   var response = await request.send();
   if (response.statusCode == 200) {
-    var data = jsonDecode(await response.stream.bytesToString());
+    var resp = await response.stream.bytesToString();
+    print(resp);
+    var data = jsonDecode(resp);
 
     if (data['status'] == true) {
       Toasty().show(data['message'], Toast.LENGTH_SHORT, ToastGravity.TOP);
@@ -159,7 +161,7 @@ class _EventFormState extends State<EventForm> {
                       isVideo: manager.video,
                     );
                   }),
-                  SetDuration(),
+                  if (profileManager.user!.role == 'admin') SetDuration(),
                   Container(
                     height: 50,
                     width: 250,

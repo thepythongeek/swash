@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:pdf/widgets.dart' as pw;
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:provider/provider.dart';
 import 'package:swash/models/message_manager.dart';
 import 'package:swash/object/get_messages.dart';
@@ -17,8 +17,7 @@ class Chats {
 }
 
 class ChatArea extends StatefulWidget {
-  final IOWebSocketChannel channel;
-  const ChatArea({Key? key, required this.channel}) : super(key: key);
+  const ChatArea({Key? key}) : super(key: key);
 
   @override
   State<ChatArea> createState() => _ChatAreaState();
@@ -27,7 +26,12 @@ class ChatArea extends StatefulWidget {
 class _ChatAreaState extends State<ChatArea> {
   final TextEditingController _controller = TextEditingController();
   late Future<List<Message>> _future;
+  List<Message>? messages;
   Stream? _stream;
+  bool update = false;
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
 
   List chats = [
     Chats(
@@ -88,6 +92,7 @@ class _ChatAreaState extends State<ChatArea> {
         Provider.of<MessageManager>(context, listen: false).conversation!;
     // getMessages(conversationId: conversation.id).then((value) => print(value));
     _future = getMessages(conversationId: conversation.id);
+
     super.initState();
   }
 
@@ -95,6 +100,8 @@ class _ChatAreaState extends State<ChatArea> {
   Widget build(BuildContext context) {
     MessageManager manager =
         Provider.of<MessageManager>(context, listen: false);
+    AppStateManager appStateManager =
+        Provider.of<AppStateManager>(context, listen: false);
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
@@ -115,33 +122,38 @@ class _ChatAreaState extends State<ChatArea> {
                       return Text('${snapshot.data}');
                     } else if (snapshot.hasData) {
                       List<Message> m = snapshot.data!;
-                      return StreamBuilder(
-                          initialData: m,
-                          stream: _stream,
-                          builder: (context, snapshot) {
-                            if (snapshot.hasData) {
-                              return SingleChildScrollView(
-                                  padding: EdgeInsets.only(
-                                      left: 10, right: 10, top: 5),
-                                  child: Consumer<MessageManager>(
-                                      builder: (context, value, child) {
-                                    return Column(
-                                      children: buildList(
-                                          m,
-                                          Provider.of<ProfileManager>(context,
-                                                  listen: false)
-                                              .user!
-                                              .id),
-                                    );
-                                  }));
-                            } else if (snapshot.hasError) {
-                              return Text('${snapshot.data}');
-                            } else {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            }
-                          });
+                      messages = m;
+
+                      return Consumer<MessageManager>(
+                          builder: (context, value, child) {
+                        return update
+                            ? StreamBuilder<dynamic>(
+                                stream: appStateManager.channelStream,
+                                builder: (context, snapshot) {
+                                  if (snapshot.hasData) {
+                                    print('|||###>>>??**');
+                                    Map<String, dynamic> data =
+                                        jsonDecode(snapshot.data);
+
+                                    print(data);
+                                    if (data['event'] == 'sendMessage') {
+                                      // update with current messages
+                                      List<Message> newMessages = [];
+                                      print('mambooo');
+                                      print(data['message']);
+                                      for (Map i in data['message']
+                                          ['messages']) {
+                                        newMessages.add(Message.fromjson(i));
+                                      }
+                                      messages!.addAll(newMessages);
+                                    }
+                                    return buildScrollingMessageBubble();
+                                  } else {
+                                    return Text(snapshot.data.toString());
+                                  }
+                                })
+                            : buildScrollingMessageBubble();
+                      });
                     } else {
                       return Center(
                         child: CircularProgressIndicator(),
@@ -150,16 +162,20 @@ class _ChatAreaState extends State<ChatArea> {
                   })),
           Expanded(
               child: TextFormField(
+            onTap: () {
+              scrollTo();
+            },
             controller: _controller,
             decoration: InputDecoration(
                 hintText: 'Enter here',
                 suffixIcon: IconButton(
                     icon: const Icon(Icons.send),
                     onPressed: (() {
+                      scrollTo();
                       /*sendMessage(
                               context: context,
                               from: Provider.of<ProfileManager>(context,
-                                      listen: false)
+                                      listen: false)                            
                                   .user!
                                   .id,
                               to: manager.recipient,
@@ -173,7 +189,7 @@ class _ChatAreaState extends State<ChatArea> {
                             Provider.of<MessageManager>(context, listen: false);
                        
                       });*/
-                      widget.channel.sink.add(jsonEncode({
+                      appStateManager.channel!.sink.add(jsonEncode({
                         "event": "sendMessage",
                         "message": {
                           "conversationId": manager.conversation != null
@@ -187,11 +203,74 @@ class _ChatAreaState extends State<ChatArea> {
                           "body": _controller.text,
                         }
                       }));
-                      //  setState(() {});
+                      setState(() {
+                        update = true;
+                      });
+                      /* widget.channel.stream.listen((event) {
+                        print('*******');
+                        Map<String, dynamic> data =
+                            jsonDecode(event['message']);
+                        print(data);
+                        // update with current messages
+                        List<Message> newMessages = [];
+                        for (Map i in data['message']['messages']) {
+                          newMessages.add(Message.fromjson(i));
+                        }
+                        messages!.addAll(newMessages);
+                        print(messages![messages!.length]);
+                      });*/
+
+                      //   setState(() {});
                     })),
                 border: OutlineInputBorder()),
           ))
         ]));
+  }
+
+  Future<void> scrollTo() {
+    return itemScrollController.scrollTo(
+        index: messages!.length - 1,
+        duration: Duration(seconds: 2),
+        curve: Curves.easeInOutCubic);
+  }
+
+  ScrollablePositionedList buildScrollingMessageBubble() {
+    return ScrollablePositionedList.builder(
+        itemPositionsListener: itemPositionsListener,
+        itemScrollController: itemScrollController,
+        itemCount: messages!.length,
+        itemBuilder: (context, index) {
+          return showMessageBubble(index, context);
+        });
+  }
+
+  Align showMessageBubble(int index, BuildContext context) {
+    messages![index].update();
+    return Align(
+      alignment: messages![index].recieverOrSender(
+                  Provider.of<ProfileManager>(context, listen: false)
+                      .user!
+                      .id) ==
+              'sender'
+          ? Alignment.topRight
+          : Alignment.topLeft,
+      child: Container(
+          margin: const EdgeInsets.only(top: 5, bottom: 5),
+          decoration: BoxDecoration(
+              color: Colors.blue, borderRadius: BorderRadius.circular(15)),
+          padding: const EdgeInsets.all(15),
+          child: Text(
+            messages![index].body,
+            style: const TextStyle(fontSize: 16, color: Colors.white),
+          )),
+    );
+  }
+
+  Column chatBody(List<Message> m, BuildContext context) {
+    return Column(
+      children: buildList(
+          m, Provider.of<ProfileManager>(context, listen: false).user!.id),
+    );
   }
 
   List<Widget> buildList(List<Message> chats, String userId) {

@@ -5,7 +5,7 @@ import 'package:swash/exceptions/network.dart';
 import '../path.dart';
 
 class Conversation {
-  Message message;
+  Message? message;
   List<Message>? messages;
   String id;
   String userId1;
@@ -15,7 +15,7 @@ class Conversation {
   String createdAt;
 
   Conversation(
-      {required this.message,
+      {this.message,
       required this.userId1,
       required this.userId2,
       required this.username,
@@ -26,7 +26,9 @@ class Conversation {
 
   factory Conversation.fromjson(Map json) {
     return Conversation(
-        message: Message.fromjson(json['messages']),
+        message: json['messages'] != null
+            ? Message.fromjson(json['messages'])
+            : null,
         id: json['conversation_id'],
         userId1: json['user_id'],
         userId2: json['user2'],

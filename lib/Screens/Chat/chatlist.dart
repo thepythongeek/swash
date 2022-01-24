@@ -20,8 +20,10 @@ class ChatList extends StatefulWidget {
 }
 
 class _ChatListState extends State<ChatList> {
-  late Future<List<m.Conversation>> conversations;
+//late Future<List<m.Conversation>> conversations;
+  List<m.Conversation>? conversation;
   late IOWebSocketChannel channel;
+  late Stream<dynamic> channelStream;
 
   @override
   void initState() {
@@ -39,6 +41,10 @@ class _ChatListState extends State<ChatList> {
     //  print(event);
     //  print('11');
     // });
+//channel = channel.changeStream((p0) => p0.asBroadcastStream());
+    channelStream = channel.stream.asBroadcastStream();
+    Provider.of<m.AppStateManager>(context, listen: false)
+        .addStream(channel, channelStream);
     super.initState();
   }
 
@@ -68,7 +74,7 @@ class _ChatListState extends State<ChatList> {
             body: Padding(
                 padding: const EdgeInsets.all(8),
                 child: StreamBuilder<dynamic>(
-                    stream: channel.stream,
+                    stream: channelStream,
                     builder: (context, snapshot) {
                       List<m.Conversation> c = [];
                       if (snapshot.hasError) {
@@ -77,19 +83,26 @@ class _ChatListState extends State<ChatList> {
                         );
                       } else if (snapshot.hasData) {
                         Map<String, dynamic> data = jsonDecode(snapshot.data!);
-                        print('got uuuu');
-                        print(data);
-                        for (Map i in data['message']) {
-                          c.add(m.Conversation.fromjson(i));
+                        // determine event
+                        if (data['event'] == 'sendMessage') {
+                          // attempt to use 'connect' event
+                          channel.sink.add(jsonEncode(
+                              {"event": "connect", "user_id": widget.userId}));
+                        } else {
+                          print('got uuuu');
+                          print(data);
+                          for (Map i in data['message']) {
+                            c.add(m.Conversation.fromjson(i));
+                          }
+                          print(c is List<m.Conversation>);
+                          conversation = c;
                         }
-                        print(c is List<m.Conversation>);
 
                         return ListView.builder(
-                            itemCount: c.length,
+                            itemCount: conversation!.length,
                             itemBuilder: (context, index) => Conversation(
-                                  channel: channel,
                                   currentUserId: widget.userId,
-                                  conversation: c[index],
+                                  conversation: conversation![index],
                                 ));
                       } else {
                         return Text('${snapshot.data}');
@@ -99,15 +112,13 @@ class _ChatListState extends State<ChatList> {
 }
 
 class Conversation extends StatefulWidget {
-  final IOWebSocketChannel channel;
   final m.Conversation conversation;
   final String currentUserId;
-  const Conversation(
-      {Key? key,
-      required this.conversation,
-      required this.currentUserId,
-      required this.channel})
-      : super(key: key);
+  const Conversation({
+    Key? key,
+    required this.conversation,
+    required this.currentUserId,
+  }) : super(key: key);
 
   @override
   _ConversationState createState() => _ConversationState();
@@ -116,6 +127,8 @@ class Conversation extends StatefulWidget {
 class _ConversationState extends State<Conversation> {
   @override
   Widget build(BuildContext context) {
+    m.AppStateManager appStateManager =
+        Provider.of<m.AppStateManager>(context, listen: false);
     return GestureDetector(
       onTap: () {
         Provider.of<MessageManager>(context, listen: false)
@@ -124,11 +137,7 @@ class _ConversationState extends State<Conversation> {
             .addRecipient(getContactId());
 
         Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => ChatArea(
-                      channel: widget.channel,
-                    )));
+            context, MaterialPageRoute(builder: (context) => ChatArea()));
       },
       child: Container(
         padding: const EdgeInsets.all(8.0),
@@ -159,14 +168,14 @@ class _ConversationState extends State<Conversation> {
                   height: 10,
                 ),
                 Text(
-                  widget.conversation.message.body,
+                  widget.conversation.message!.body,
                   // style: theme.textTheme.bodyText1,
                 )
               ],
             ),
             const Spacer(),
             Text(
-              '${DateTime.parse(widget.conversation.message.createdAt).year}',
+              '${DateTime.parse(widget.conversation.message!.createdAt).year}',
               // style: theme.textTheme.bodyText1,
             )
           ],

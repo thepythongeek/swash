@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:swash/models/models.dart';
 import 'package:swash/object/register.dart';
 import 'package:provider/provider.dart';
@@ -232,18 +233,37 @@ class _UserRegisterState extends State<UserRegister> {
                             .addUser(User(
                                 role: value.role, id: value.userId.toString()));
 
-                        /*getProfile(value.roleId, "null").then((value) {
-                          Provider.of<AppStateManager>(context, listen: false)
+                        getProfile(value.userId, "null").then((value) {
+                          Provider.of<ProfileManager>(context, listen: false)
                               .updateprofile(value.profile);
-                          print(Provider.of<AppStateManager>(context,
-                                  listen: false)
-                              .user
-                              .profile!
-                              .name);
-                          
-                        });*/
-                        Provider.of<AppStateManager>(context, listen: false)
-                            .goto(MyPages.redirect, true);
+                        });
+
+                        // store the user id and role
+                        FlutterSecureStorage storage = FlutterSecureStorage();
+                        storage.write(
+                          key: 'id',
+                          value: value.userId,
+                        );
+                        storage.write(key: 'role', value: value.role);
+
+                        AppStateManager appStatemanager =
+                            Provider.of<AppStateManager>(context,
+                                listen: false);
+                        switch (value.role) {
+                          case "ward":
+                            appStatemanager.goto(MyPages.ward, true);
+                            break;
+                          case "voter":
+                          case "admin":
+                            appStatemanager.goto(MyPages.redirect, true);
+                            appStatemanager.goto(MyPages.register, false);
+
+                            break;
+                          case "teacher":
+                            appStatemanager.goto(MyPages.school, true);
+                            break;
+                        }
+                        appStatemanager.goto(MyPages.redirect, true);
                       });
                     },
                     child: const Text(

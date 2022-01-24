@@ -45,6 +45,13 @@ class _DraggableCommentsState extends State<DraggableComments> {
         Provider.of<ProfileManager>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Provider.of<AppStateManager>(context, listen: false)
+                .goto(MyPages.comments, false);
+          },
+        ),
         title: const Text('Comments'),
         centerTitle: true,
       ),

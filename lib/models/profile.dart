@@ -3,7 +3,7 @@ class GetProfile {
 
   Profile profile;
 
-  factory GetProfile.fromJson(Map<String, dynamic> json) => GetProfile(
+  factory GetProfile.fromJson(var json) => GetProfile(
         profile: Profile.fromJson(json["profile"]),
       );
 
@@ -52,7 +52,7 @@ class Profile {
 
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
       id: json["id"],
-      bio: json["bio"],
+      bio: json["bio"] ?? '',
       name: json["name"],
       ward: json["ward"],
       email: json["email"],

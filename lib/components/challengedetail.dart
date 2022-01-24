@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:swash/components/components.dart';
@@ -9,7 +10,9 @@ import 'package:swash/models/models.dart';
 import 'package:swash/models/pages.dart';
 import 'package:swash/models/themes.dart';
 import 'package:swash/object/get_competition_details.dart';
+import 'package:swash/object/subscribe_competition.dart';
 import 'package:swash/object/upload_photo.dart';
+import 'package:swash/utility/location.dart';
 import '../path.dart';
 
 class ChallengeDetail extends StatefulWidget {
@@ -39,6 +42,7 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
         Provider.of<ProfileManager>(context, listen: false);
     ThemeManager themeManager =
         Provider.of<ThemeManager>(context, listen: false);
+    print(profileManager.user!.profile!.school!['id']);
     if (!roles.contains(profileManager.user!.role)) {
       print(profileManager.user!.role);
       getCompetitionDetails(
@@ -50,6 +54,7 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
         setState(() {
           _details = value;
           _images = value.images;
+          print(_images);
         });
       });
     }
@@ -160,10 +165,30 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
                                   style: ElevatedButton.styleFrom(
                                       padding: EdgeInsets.symmetric(
                                           horizontal: 80.0)),
-                                  onPressed: () {},
+                                  onPressed: _details!.isSubscribed
+                                      ? null
+                                      : () {
+                                          subscribeCompetition(
+                                                  profileManager.user!.profile!
+                                                      .school!['id'],
+                                                  themeManager.getTheme.id)
+                                              .then((value) {
+                                            String message;
+                                            if (value) {
+                                              message =
+                                                  'you subscribed successfully';
+                                            } else {
+                                              message =
+                                                  'subcribing to this competiton failed';
+                                            }
+                                            ScaffoldMessenger.of(context)
+                                                .showSnackBar(SnackBar(
+                                                    content: Text(message)));
+                                          });
+                                        },
                                   child: Text(_details!.isSubscribed
                                       ? 'Subscribed'
-                                      : 'Unsubscribed')))
+                                      : 'Subscribe')))
                         ],
                       ),
                     ),
@@ -183,7 +208,7 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
                                 color: Colors.black.withOpacity(.65),
                                 elevation: 12,
                                 child: Image.network(
-                                  '${AppPath.server}/${_images[index]['url']}',
+                                  '${AppPath.domain}/${_images[index]['url']}',
                                   fit: BoxFit.contain,
                                 ),
                               );
@@ -209,7 +234,9 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
                           ElevatedButton(
-                            onPressed: onPickImage,
+                            onPressed: () async {
+                              await onPickImage();
+                            },
                             child: Text('Take photo '),
                           ),
                           ElevatedButton(
@@ -243,6 +270,10 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
     ImageSource source = ImageSource.camera,
     int? quality = 90,
   }) async {
+    // attempt to get location first
+    Position position = await getLocation();
+
+    Provider.of<AppStateManager>(context, listen: false).addPosition(position);
     final pickedFile =
         await _picker.pickImage(source: source, imageQuality: quality);
     setState(() {

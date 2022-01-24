@@ -5,6 +5,7 @@ import 'package:swash/Screens/redirect.dart';
 import 'package:swash/models/models.dart';
 
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/io.dart';
 import '../Screens/front_page.dart';
 import '../Screens/auth/login_form.dart';
 import '../Screens/auth/signin.dart';
@@ -17,6 +18,11 @@ class AppStateManager extends ChangeNotifier {
   Position? _position;
   int? _expiringDuration;
   DateTime? _date;
+  IOWebSocketChannel? _channel;
+  Stream<dynamic>? _channelStream;
+
+  IOWebSocketChannel? get channel => _channel;
+  Stream<dynamic>? get channelStream => _channelStream;
 
   // an array of initial routes
   List<MaterialPage> pages = [FrontPage.page()];
@@ -29,6 +35,11 @@ class AppStateManager extends ChangeNotifier {
   int? get duration => _expiringDuration;
 
   NavigationState get navigation => _navigationState;
+
+  void addStream(IOWebSocketChannel channel, Stream<dynamic> stream) {
+    _channel = channel;
+    _channelStream = stream;
+  }
 
   void toComments(bool value) {
     _showComments = value;

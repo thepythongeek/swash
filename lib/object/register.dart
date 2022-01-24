@@ -42,7 +42,7 @@ Future<Register> register(
 
 class Register {
   final bool success;
-  final int userId;
+  final String userId;
   final String roleId;
   final String role;
   final String message;
@@ -56,7 +56,7 @@ class Register {
 
   factory Register.fromJson(Map<String, dynamic> json) {
     return Register(
-        userId: json['user_id'],
+        userId: json['user_id'].toString(),
         roleId: json['role_id'],
         message: json['message'],
         role: json['role'],
