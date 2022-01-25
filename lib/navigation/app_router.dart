@@ -124,6 +124,7 @@ class RouteManager extends RouterDelegate
               profileManager.user!.role == 'teacher')
             School.page(),
           if (appStateManager.navigation.ward &&
+              profileManager.user != null &&
               profileManager.user!.role == 'ward')
             Ward.page(),
           if (appStateManager.navigation.toeventform &&
@@ -135,8 +136,8 @@ class RouteManager extends RouterDelegate
           if (appStateManager.navigation.schoolForm)
             school.SchoolForm.page(postmanager.getPost),
           if (appStateManager.navigation.challenge) ChallengeDetail.page(),
-          if (appStateManager.showComments)
-            DraggableComments.page(commentManager.postId)
+          if (appStateManager.showComments && commentManager.postId != null)
+            DraggableComments.page(commentManager.postId!)
         ]
         //pages: appStateManager.pages,
         );

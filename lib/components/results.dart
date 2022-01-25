@@ -43,38 +43,44 @@ class DropDown extends StatefulWidget {
 
 class _DropDownState extends State<DropDown> {
   List _listCompetition = [];
-  bool _loading = true;
+  late Future<GetCompetition> _getCompetitions;
   String? _selectedMenuItem;
 
   @override
   void initState() {
     super.initState();
-    getCompetitions().then((value) {
-      _listCompetition = value.competitions;
-
-      Provider.of<CompetitionManager>(context, listen: false)
-          .addId(_listCompetition[0]['id']);
-      setState(() {
-        _loading = false;
-      });
-    });
+    _getCompetitions = getCompetitions();
   }
 
   @override
   Widget build(BuildContext context) {
+    return FutureBuilder<GetCompetition>(
+        future: _getCompetitions,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            _listCompetition = snapshot.data!.competitions;
+            Provider.of<CompetitionManager>(context, listen: false)
+                .addId(_listCompetition[0]['id']);
+            return displayDropDownButton(
+                _listCompetition, _listCompetition[0]['name']);
+          } else if (snapshot.hasError) {
+            return const Center(
+              child: Text('something is wrong please try again'),
+            );
+          } else {
+            return displayDropDownButton(null, 'Current Challenge Results');
+          }
+        });
+  }
+
+  DropdownButton<String> displayDropDownButton(List? items, String hint) {
     return DropdownButton<String>(
       isExpanded: true,
       hint: Padding(
         padding: const EdgeInsets.all(1),
-        child: Text(_loading
-            ? "Current Challenge Results(Press to Change)"
-            : "${_listCompetition[0]['name']}"),
+        child: Text(hint),
       ),
-      items: _loading
-          ? []
-          : _listCompetition
-              .map((item) => buildDropdownMenuItem(item))
-              .toList(),
+      items: items?.map((item) => buildDropdownMenuItem(item)).toList(),
       value: _selectedMenuItem, // values should match
       onChanged: (String? value) {
         setState(() {
@@ -118,7 +124,7 @@ class _ResultsPageState extends State<Results> {
         const DropDown(),
         Consumer<CompetitionManager>(
           builder: (context, competitionManager, child) {
-            print(competitionManager.school!);
+            //print(competitionManager.school!);
             return FittedBox(
                 child: DataTable(
                     columns: const [

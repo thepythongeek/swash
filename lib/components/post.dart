@@ -43,7 +43,6 @@ class _PostState extends State<Post> {
         Provider.of<AppStateManager>(context, listen: false);
     final Postmanager postmanager =
         Provider.of<Postmanager>(context, listen: false);
-    print(widget.post.imageLink);
 
     return FocusDetector(
         onVisibilityGained: () {
@@ -89,13 +88,13 @@ class _PostState extends State<Post> {
                     _appStateManager.goto(MyPages.schoolForm, true);
                   },
                   child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // a column and an image
                       Expanded(
                           child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('written by'),
                           FittedBox(
                             child: profileRow(
                                 path: widget.post.profilePic,
@@ -119,17 +118,20 @@ class _PostState extends State<Post> {
                           child: ClipRRect(
                         child: widget.post.mediaType == 'video' //&& _play
                             ? MediaPlayer(fileUrl: widget.post.imageLink)
-                            : Image.network(
-                                widget.post.imageLink.startsWith('http')
-                                    ? widget.post.imageLink
-                                    : '${AppPath.domain}/${widget.post.imageLink}',
-                                errorBuilder: (context, object, stacktrace) {
-                                  return const SizedBox(
-                                    child: Placeholder(),
-                                    height: 45,
-                                  );
-                                },
-                                fit: BoxFit.cover,
+                            : AspectRatio(
+                                aspectRatio: 4 / 3,
+                                child: Image.network(
+                                  widget.post.imageLink.startsWith('http')
+                                      ? widget.post.imageLink
+                                      : '${AppPath.domain}/${widget.post.imageLink}',
+                                  errorBuilder: (context, object, stacktrace) {
+                                    return const SizedBox(
+                                      child: Placeholder(),
+                                      height: 45,
+                                    );
+                                  },
+                                  fit: BoxFit.cover,
+                                ),
                               ),
                       ))
                     ],
@@ -154,17 +156,13 @@ class _PostState extends State<Post> {
                           likes: widget.post.totalLikes,
                           views: widget.post.totalViews),
                     ),
-                    Row(
-                      children: [
-                        const IconButton(
-                            onPressed: null,
-                            icon: Icon(Icons.error_outline_outlined)),
-                        const SizedBox(
-                          width: 8,
-                        ),
-                        Text('${widget.post.totalViews}')
-                      ],
-                    )
+                    PostButton(
+                        postID: widget.post.id.toString(),
+                        views: Views(
+                            comments: widget.post.totalComments,
+                            likes: widget.post.totalLikes,
+                            views: widget.post.totalViews),
+                        name: 'views')
                   ],
                 ),
               ],
@@ -207,9 +205,7 @@ class _MediaPlayerState extends State<MediaPlayer> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.done) {
             if (snapshot.hasError) {
-              return Center(
-                child: Text('$snapshot.data'),
-              );
+              return Container();
             } else {
               return Stack(children: [
                 AspectRatio(
@@ -223,8 +219,8 @@ class _MediaPlayerState extends State<MediaPlayer> {
                         iconSize: 50,
                         onPressed: () {
                           setState(() {
-                            _controller!.play();
-                            _play = false;
+                            _play ? _controller!.play() : _controller!.pause();
+                            _play = !_play;
                           });
                         },
                         icon: Icon(_play ? Icons.play_arrow : Icons.pause)))
@@ -251,7 +247,7 @@ class _MediaPlayerState extends State<MediaPlayer> {
     // add a listener
     _controller!.addListener(() {
       VideoPlayerValue value = _controller!.value;
-      if (!value.isPlaying) {
+      if (value.position == value.duration) {
         setState(() {
           _play = true;
         });

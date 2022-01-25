@@ -22,7 +22,6 @@ class PostButton extends StatefulWidget {
 
 class _PostButtonState extends State<PostButton> {
   bool _selected = false;
-  late Future<Views> _views;
   final Map<String, Widget> _buttons = {
     'like': const Icon(Icons.favorite_border_outlined),
     'views': const Icon(Icons.visibility_outlined),
@@ -42,9 +41,9 @@ class _PostButtonState extends State<PostButton> {
                   setState(() {
                     _selected = !_selected;
                     if (_selected) {
-                      whoViewOrlike(widget.postID, -1, 0, 0);
-                    } else {
                       whoViewOrlike(widget.postID, 1, 0, 0);
+                    } else {
+                      whoViewOrlike(widget.postID, -1, 0, 0);
                     }
                   });
 
@@ -55,7 +54,9 @@ class _PostButtonState extends State<PostButton> {
                   break;
               }
             },
-            icon: _buttons[widget.name]!),
+            icon: _selected && widget.name == 'like'
+                ? Icon(Icons.favorite_rounded)
+                : _buttons[widget.name]!),
         const SizedBox(
           width: 8,
         ),
@@ -67,6 +68,8 @@ class _PostButtonState extends State<PostButton> {
   int getValue(String name) {
     if (name == 'like') {
       return widget.views.likes;
+    } else if (name == 'views') {
+      return widget.views.views;
     } else {
       return widget.views.comments;
     }

@@ -43,11 +43,14 @@ class _DraggableCommentsState extends State<DraggableComments> {
     print(widget.postId);
     ProfileManager profileManager =
         Provider.of<ProfileManager>(context, listen: false);
+    CommentManager commentManager =
+        Provider.of<CommentManager>(context, listen: false);
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
+            commentManager.reset();
             Provider.of<AppStateManager>(context, listen: false)
                 .goto(MyPages.comments, false);
           },

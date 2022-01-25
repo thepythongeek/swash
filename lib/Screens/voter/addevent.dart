@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 import 'package:image_picker/image_picker.dart';
+import 'package:swash/components/components.dart';
 import 'package:video_player/video_player.dart';
 import 'package:http_parser/http_parser.dart';
 import '../../path.dart';
@@ -129,7 +130,7 @@ class _EventFormState extends State<EventForm> {
                   );
                 });
           },
-          child: Icon(Icons.camera),
+          child: const Icon(Icons.camera),
         ),
         body: Container(
             padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
@@ -163,51 +164,45 @@ class _EventFormState extends State<EventForm> {
                   }),
                   if (profileManager.user!.role == 'admin') SetDuration(),
                   Container(
-                    height: 50,
-                    width: 250,
-                    decoration: BoxDecoration(
-                        color: Colors.blue,
-                        borderRadius: BorderRadius.circular(20)),
-                    child: TextButton(
-                      onPressed: () async {
-                        http.MultipartFile multipartFile;
-                        if (fileManager.video == 'video') {
-                          multipartFile = await http.MultipartFile.fromPath(
-                              'image', fileManager.file!.path,
-                              contentType: MediaType('video', 'mp4'));
-                        } else {
-                          multipartFile = await http.MultipartFile.fromPath(
-                              'image', fileManager.file!.path);
-                        }
+                      height: 50,
+                      width: 250,
+                      decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius: BorderRadius.circular(20)),
+                      child: LoadingButton(
+                        child: Text('Submit'),
+                        function: () async {
+                          http.MultipartFile multipartFile;
+                          if (fileManager.video == 'video') {
+                            multipartFile = await http.MultipartFile.fromPath(
+                                'image', fileManager.file!.path,
+                                contentType: MediaType('video', 'mp4'));
+                          } else {
+                            multipartFile = await http.MultipartFile.fromPath(
+                                'image', fileManager.file!.path);
+                          }
 
-                        final title = titleController.text;
-                        final descriptions = descriptionsController.text;
+                          final title = titleController.text;
+                          final descriptions = descriptionsController.text;
 
-                        if (title != "" || descriptions != "") {
-                          postEvent(
-                                  title: title,
-                                  mediaType:
-                                      fileManager.video ? 'video' : 'image',
-                                  multipartFile: multipartFile,
-                                  userID: profileManager.user!.id,
-                                  duration: appStateManager.duration != null
-                                      ? appStateManager.duration.toString()
-                                      : '',
-                                  descriptions: descriptions)
-                              .then((value) {
+                          if (title != "" || descriptions != "") {
+                            await postEvent(
+                                title: title,
+                                mediaType:
+                                    fileManager.video ? 'video' : 'image',
+                                multipartFile: multipartFile,
+                                userID: profileManager.user!.id,
+                                duration: appStateManager.duration != null
+                                    ? appStateManager.duration.toString()
+                                    : '',
+                                descriptions: descriptions);
                             fileManager.reset();
-                          });
-                        } else {
-                          Toasty().show("At least one field must be filled.",
-                              Toast.LENGTH_SHORT, ToastGravity.BOTTOM);
-                        }
-                      },
-                      child: const Text(
-                        'Submit',
-                        style: TextStyle(color: Colors.white, fontSize: 25),
-                      ),
-                    ),
-                  ),
+                          } else {
+                            Toasty().show("At least one field must be filled.",
+                                Toast.LENGTH_SHORT, ToastGravity.BOTTOM);
+                          }
+                        },
+                      )),
                 ],
               ),
             )));

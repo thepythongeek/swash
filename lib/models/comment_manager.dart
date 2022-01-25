@@ -4,7 +4,7 @@ class CommentManager extends ChangeNotifier {
   List<Comment> _comments = [];
   String? _postId;
   List<Comment> get comments => _comments;
-  String get postId => _postId!;
+  String? get postId => _postId;
 
   void add(List<Comment> comments, String postId) {
     _comments = comments;

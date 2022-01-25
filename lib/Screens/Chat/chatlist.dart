@@ -10,6 +10,7 @@ import 'package:swash/models/message_manager.dart';
 import 'package:swash/object/send_chat.dart';
 import 'package:web_socket_channel/io.dart';
 import '../../models/models.dart' as m;
+import '../../path.dart';
 
 class ChatList extends StatefulWidget {
   final String userId;
@@ -29,20 +30,22 @@ class _ChatListState extends State<ChatList> {
   void initState() {
     // conversations = getConversations(
     //    userId: Provider.of<m.ProfileManager>(context, listen: false).user!.id);
-    channel = IOWebSocketChannel.connect(Uri.parse('ws://192.168.1.191:8080'));
+    channel = IOWebSocketChannel.connect(
+        Uri.parse('ws://www.swashcompetition.com:8080'));
     // attempt to use 'register' event
     channel.sink
         .add(jsonEncode({"event": "register", "user_id": widget.userId}));
     // attempt to use 'connect' event
     channel.sink
         .add(jsonEncode({"event": "connect", "user_id": widget.userId}));
-    // channel.stream.listen((event) {
-    //  channel.sink.add('helooo from dart');
-    //  print(event);
-    //  print('11');
-    // });
+
 //channel = channel.changeStream((p0) => p0.asBroadcastStream());
     channelStream = channel.stream.asBroadcastStream();
+    channelStream.listen((event) {
+      //channel.sink.add('helooo from dart');
+      print(event);
+      print('11');
+    });
     Provider.of<m.AppStateManager>(context, listen: false)
         .addStream(channel, channelStream);
     super.initState();
@@ -82,6 +85,7 @@ class _ChatListState extends State<ChatList> {
                           child: Text('${snapshot.data}'),
                         );
                       } else if (snapshot.hasData) {
+                        print(snapshot.data!);
                         Map<String, dynamic> data = jsonDecode(snapshot.data!);
                         // determine event
                         if (data['event'] == 'sendMessage') {
@@ -105,7 +109,9 @@ class _ChatListState extends State<ChatList> {
                                   conversation: conversation![index],
                                 ));
                       } else {
-                        return Text('${snapshot.data}');
+                        return const Center(
+                          child: CircularProgressIndicator(),
+                        );
                       }
                     }))));
   }

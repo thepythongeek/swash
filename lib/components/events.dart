@@ -49,7 +49,6 @@ class _UpdatesState extends State<Updates> {
 
   @override
   void initState() {
-    print(Provider.of<ProfileManager>(context, listen: false).user!.role);
     super.initState();
     _getPosts = getPosts(context);
     _listOfThemes = getThemes('all');
@@ -65,7 +64,6 @@ class _UpdatesState extends State<Updates> {
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.add),
           onPressed: () {
-            print('9000');
             Provider.of<AppStateManager>(context, listen: false)
                 .goto(MyPages.eventform, true);
           },
@@ -96,7 +94,7 @@ class _UpdatesState extends State<Updates> {
                                   .where((element) =>
                                       element.id != value.getFreshPost.id)
                                   .toList();
-                              print(posts.length);
+
                               posts.add(value.getFreshPost);
                               //posts.add(value.getFreshPost);
                               //value.resetUpdateEvent();

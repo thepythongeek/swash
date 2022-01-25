@@ -78,25 +78,23 @@ class _SurveyFormState extends State<SurveyForm> {
                     hintText: theme.qnsTwoField),
               ),
             ),
-            ElevatedButton(
-                onPressed: () {
+            LoadingButton(
+                function: () async {
                   if (_formKey.currentState!.validate()) {
-                    print('999');
                     if (calculateDistance(profileManager.user!.profile!.school!,
                         appStateManager.position!)) {
-                      createUploadPhoto(
-                              File(widget.xfile.path),
-                              widget.schoolId,
-                              qnsOne.text,
-                              qnsTwo.text,
-                              widget.competitionId)
-                          .then((value) {
-                        ScaffoldMessenger.of(context)
-                            .showSnackBar(SnackBar(content: Text(value)));
-                        Navigator.pop(context);
-                      });
+                      String value = await createUploadPhoto(
+                          File(widget.xfile.path),
+                          widget.schoolId,
+                          qnsOne.text,
+                          qnsTwo.text,
+                          widget.competitionId);
+
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(value)));
+                      Navigator.pop(context);
                     } else {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text(
                               'It seems you are no where near the school, you need to be around the school to take this photo')));
                     }
