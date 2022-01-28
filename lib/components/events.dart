@@ -10,8 +10,10 @@ import 'package:swash/object/get_themes.dart';
 import 'package:swash/Screens/voter/addevent.dart';
 import 'package:swash/components/post.dart' as component;
 
-Future<GetPosts> getPosts(BuildContext context) async {
-  final response = await http.get(Uri.parse('${AppPath.domain}/get_posts.php'));
+Future<GetPosts> getPosts(BuildContext context,
+    {bool? next, String? startId, String? lastId}) async {
+  final response = await http.post(Uri.parse('${AppPath.domain}/get_posts.php'),
+      body: {"next": next, "start_id": startId, "last_id": lastId});
 
   if (response.statusCode == 200) {
     return GetPosts.fromJson(
