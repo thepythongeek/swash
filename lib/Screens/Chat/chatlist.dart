@@ -92,7 +92,7 @@ class _ChatListState extends State<ChatList> {
                           // attempt to use 'connect' event
                           channel.sink.add(jsonEncode(
                               {"event": "connect", "user_id": widget.userId}));
-                        } else {
+                        } else if (data['event'] == 'connect') {
                           print('got uuuu');
                           print(data);
                           for (Map i in data['message']) {
@@ -174,14 +174,14 @@ class _ConversationState extends State<Conversation> {
                   height: 10,
                 ),
                 Text(
-                  widget.conversation.message!.body,
+                  widget.conversation.message?.body ?? '',
                   // style: theme.textTheme.bodyText1,
                 )
               ],
             ),
             const Spacer(),
             Text(
-              '${DateTime.parse(widget.conversation.message!.createdAt).year}',
+              '${DateTime.parse(widget.conversation.message?.createdAt ?? '2022-01-01T11:00').year}',
               // style: theme.textTheme.bodyText1,
             )
           ],

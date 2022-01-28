@@ -14,8 +14,14 @@ import '../path.dart';
 class GetPosts {
   bool success;
   List posts;
+  String? startId;
+  String? lastId;
 
-  GetPosts({required this.success, required this.posts});
+  GetPosts(
+      {required this.success,
+      required this.posts,
+      required this.lastId,
+      required this.startId});
 
   factory GetPosts.fromJson(
       {required Map<String, dynamic> json, BuildContext? context}) {
@@ -23,7 +29,11 @@ class GetPosts {
     for (var post in json['message']) {
       posts.add(Posts.fromJson(json: post, context: context!));
     }
-    return GetPosts(success: json['success'], posts: posts);
+    return GetPosts(
+        success: json['success'],
+        posts: posts,
+        startId: json['start_id'],
+        lastId: json['last_id']);
   }
 }
 

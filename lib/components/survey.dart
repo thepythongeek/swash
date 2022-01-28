@@ -55,8 +55,12 @@ class _SurveyFormState extends State<SurveyForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(
-              child: Image.file(File(widget.xfile.path)),
+            AspectRatio(
+              aspectRatio: 5 / 6,
+              child: Image.file(
+                File(widget.xfile.path),
+                fit: BoxFit.fill,
+              ),
             ),
             Container(
               margin: const EdgeInsets.all(5),

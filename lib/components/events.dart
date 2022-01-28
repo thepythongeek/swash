@@ -9,11 +9,16 @@ import 'package:swash/models/themes.dart';
 import 'package:swash/object/get_themes.dart';
 import 'package:swash/Screens/voter/addevent.dart';
 import 'package:swash/components/post.dart' as component;
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 
 Future<GetPosts> getPosts(BuildContext context,
-    {bool? next, String? startId, String? lastId}) async {
+    {String next = "null",
+    String startId = "null",
+    String lastId = "null"}) async {
   final response = await http.post(Uri.parse('${AppPath.domain}/get_posts.php'),
       body: {"next": next, "start_id": startId, "last_id": lastId});
+
+  print(response.body);
 
   if (response.statusCode == 200) {
     return GetPosts.fromJson(
@@ -46,14 +51,63 @@ class Updates extends StatefulWidget {
 
 class _UpdatesState extends State<Updates> {
   List posts = [];
+  String? startId;
+  String? lastId;
   late Future<GetPosts> _getPosts;
   late Future<GetThemes> _listOfThemes;
+  ScrollController _controller = ScrollController();
+  final PagingController _pagingController =
+      PagingController<String, Posts>(firstPageKey: "null");
+
+  void _scrollListener() {
+    Postmanager postmanager = Provider.of<Postmanager>(context, listen: false);
+    if (_controller.offset >= _controller.position.maxScrollExtent &&
+        !_controller.position.outOfRange) {
+      // getPosts(context,
+      //     startId: startId ?? "null", lastId: lastId!, next: "true");
+      //  postmanager.loadPosts();
+      getPosts(context,
+              startId: startId ?? "null", lastId: lastId!, next: "true")
+          .then((value) {
+        postmanager.addMorePosts(value);
+        postmanager.loadPosts();
+      });
+    }
+    if (_controller.offset <= _controller.position.minScrollExtent &&
+        !_controller.position.outOfRange) {
+      getPosts(context,
+              startId: startId ?? "null", lastId: lastId!, next: "false")
+          .then((value) {
+        postmanager.addMorePosts(value);
+        postmanager.loadPosts();
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _getPosts = getPosts(context);
+    _controller.addListener(_scrollListener);
+    //_getPosts = getPosts(context);
+    //  getPosts(context, startId: "6", lastId: "1", next: "true");
     _listOfThemes = getThemes('all');
+    _pagingController.addPageRequestListener((pageKey) {
+      retrievePosts(pageKey);
+    });
+  }
+
+  Future<void> retrievePosts(String pageKey) async {
+    GetPosts value;
+    try {
+      if (pageKey == "null") {
+        value = await getPosts(context);
+      } else {
+        value = await getPosts(context, next: "true", lastId: pageKey);
+      }
+      _pagingController.appendPage(value.posts, value.lastId);
+    } catch (error) {
+      _pagingController.error = error;
+    }
   }
 
   @override
@@ -70,63 +124,103 @@ class _UpdatesState extends State<Updates> {
                 .goto(MyPages.eventform, true);
           },
         ),
-        body: FutureBuilder<GetPosts>(
+        body: RefreshIndicator(
+            child: PagedListView.separated(
+                pagingController: _pagingController,
+                builderDelegate: PagedChildBuilderDelegate<Posts>(
+                  itemBuilder: (context, posts, index) {
+                    print(posts);
+                    return component.Post(
+                      post: posts,
+                    );
+                  },
+                  firstPageErrorIndicatorBuilder: (context) =>
+                      Center(child: Text('${_pagingController.error}')),
+                  newPageProgressIndicatorBuilder: (context) =>
+                      const CircularProgressIndicator(),
+                ),
+                separatorBuilder: (context, index) => const SizedBox(
+                      height: 16,
+                    )),
+            onRefresh: () => Future.sync(() => _pagingController.refresh())));
+    /* FutureBuilder<GetPosts>(
             future: _getPosts,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData) {
-                  var posts = snapshot.data!.posts;
-                  return posts.isEmpty
-                      ? Center(
-                          child: availableCompetition(
-                              appStateManager, themeManager),
-                        )
-                      : ListView(children: [
-                          const ListTile(
-                            tileColor: Colors.white,
-                            title: Text(
-                              'Current Updates',
-                              style: TextStyle(color: Colors.blue),
-                            ),
-                          ),
-                          Consumer<Postmanager>(
-                              builder: (context, value, child) {
-                            if (value.onUpdate) {
-                              posts = posts
-                                  .where((element) =>
-                                      element.id != value.getFreshPost.id)
-                                  .toList();
+                  posts = snapshot.data!.posts;
+                  if (posts.isNotEmpty) {
+                    print(snapshot.data!.startId);
+                    startId = snapshot.data!.startId;
+                    lastId = snapshot.data!.lastId;
+                  }
+                  return ListView(controller: _controller, children: [
+                    if (posts.isEmpty)
+                      availableCompetition(appStateManager, themeManager),
+                    if (posts.isNotEmpty)
+                      const ListTile(
+                        tileColor: Colors.white,
+                        title: Text(
+                          'Current Updates',
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      ),
+                    if (posts.isNotEmpty)
+                      Consumer<Postmanager>(builder: (context, value, child) {
+                        if (value.onUpdate) {
+                          posts = posts
+                              .where((element) =>
+                                  element.id != value.getFreshPost.id)
+                              .toList();
 
-                              posts.add(value.getFreshPost);
-                              //posts.add(value.getFreshPost);
-                              //value.resetUpdateEvent();
-                              return component.Post(post: posts[0]);
-                            } else {
-                              return component.Post(post: posts[0]);
-                            }
-                          }),
-                          availableCompetition(appStateManager, themeManager),
-                          Container(
-                            child: const ListTile(
-                              title: Text('Other Updates'),
-                              tileColor: Colors.white,
-                            ),
-                          ),
-                          Consumer<Postmanager>(
-                              builder: (context, value, child) {
-                            if (value.onUpdate) {
-                              value.resetUpdateEvent();
-                            }
-                            return ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemBuilder: (context, index) {
-                                return component.Post(post: posts[index + 1]);
-                              },
-                              itemCount: posts.length - 1,
-                            );
-                          })
-                        ]);
+                          posts.add(value.getFreshPost);
+                          //posts.add(value.getFreshPost);
+                          //value.resetUpdateEvent();
+                          return component.Post(post: posts[0]);
+                        } else {
+                          return component.Post(post: posts[0]);
+                        }
+                      }),
+                    if (posts.isNotEmpty)
+                      availableCompetition(appStateManager, themeManager),
+                    if (posts.isNotEmpty)
+                      Container(
+                        child: const ListTile(
+                          title: Text('Other Updates'),
+                          tileColor: Colors.white,
+                        ),
+                      ),
+                    if (posts.isNotEmpty)
+                      Consumer<Postmanager>(builder: (context, value, child) {
+                        if (value.onUpdate) {
+                          value.resetUpdateEvent();
+                        }
+                        if (value.morePosts) {
+                          List _posts = value.posts.posts;
+                          startId = value.posts.startId;
+                          lastId = value.posts.lastId;
+                          // allow our app to have maximum of 12 posts
+                          // at any moment. If there are more
+                          // discard old posts entirely
+                          if (posts.length == 12) {
+                            posts = _posts;
+                          } else {
+                            posts.addAll(_posts);
+                          }
+                          value.resetMorepostsEvent();
+                        }
+
+                        /* return ListView.builder(
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemBuilder: (context, index) {
+                            return component.Post(post: posts[index + 1]);
+                          },
+                          itemCount: posts.length - 1,
+                        );*/
+                        
+                      })
+                  ]);
                 } else {
                   return const Center(
                     child: Text('Something went wrong please come back again'),
@@ -137,7 +231,7 @@ class _UpdatesState extends State<Updates> {
                   child: CircularProgressIndicator(),
                 );
               }
-            }));
+            }));*/
   }
 
   Card availableCompetition(
