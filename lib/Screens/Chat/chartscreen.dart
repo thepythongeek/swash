@@ -171,11 +171,11 @@ class _ChatAreaState extends State<ChatArea> {
                 suffixIcon: IconButton(
                     icon: const Icon(Icons.send),
                     onPressed: (() {
-                      scrollTo();
+                      //scrollTo();
                       /*sendMessage(
                               context: context,
                               from: Provider.of<ProfileManager>(context,
-                                      listen: false)                            
+                                      listen: false)
                                   .user!
                                   .id,
                               to: manager.recipient,
@@ -187,8 +187,12 @@ class _ChatAreaState extends State<ChatArea> {
                         // manager.update(value);
                         manager =
                             Provider.of<MessageManager>(context, listen: false);
-                       
                       });*/
+                      print(manager.recipient);
+                      print(Provider.of<ProfileManager>(context, listen: false)
+                          .user!
+                          .id);
+                      print(manager.conversation?.id);
                       appStateManager.channel!.sink.add(jsonEncode({
                         "event": "sendMessage",
                         "message": {

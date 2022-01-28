@@ -5,14 +5,19 @@ import 'posts.dart';
 class Postmanager extends ChangeNotifier {
   Posts? _post;
   Posts? _freshPost;
+  GetPosts? _posts;
+  bool load = false;
   bool _onUpdate = false;
+  bool _morePosts = false;
   bool _isViewed = false;
   bool _isLiked = false;
 
   Posts get getPost => _post!;
   Posts get getFreshPost => _freshPost!;
+  GetPosts get posts => _posts!;
   bool get isViewed => _isViewed;
   bool get onUpdate => _onUpdate;
+  bool get morePosts => _morePosts;
 
   void addPost(
       {required int id,
@@ -90,6 +95,21 @@ class Postmanager extends ChangeNotifier {
 
   void resetUpdateEvent() {
     _onUpdate = false;
+  }
+
+  void resetMorepostsEvent() {
+    _morePosts = false;
+  }
+
+  void addMorePosts(GetPosts value) {
+    _posts = value;
+    _morePosts = true;
+    notifyListeners();
+  }
+
+  void loadPosts() {
+    load = !load;
+    notifyListeners();
   }
 }
 

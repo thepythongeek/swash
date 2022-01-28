@@ -17,6 +17,8 @@ Future<Views> whoViewOrlike(
             "who_comment": whoComment.toString()
           });
 
+  print(response.body);
+
   if (response.statusCode == 200) {
     return Views.fromJson(json.decode(response.body));
   } else {
