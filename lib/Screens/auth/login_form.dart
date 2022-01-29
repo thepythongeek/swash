@@ -149,7 +149,7 @@ class _LoginPageState extends State<LoginPage> {
                               break;
                             case "voter":
                             case "admin":
-                              appStateManager.goto(MyPages.redirect, true);
+                              appStateManager.goto(MyPages.voter, true);
                               appStateManager.goto(MyPages.login, false);
 
                               break;

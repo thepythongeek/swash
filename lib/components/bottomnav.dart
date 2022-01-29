@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:swash/Screens/Chat/chatlist.dart';
-import 'package:swash/models/appmanager.dart';
+
 import 'package:swash/models/models.dart';
-import '../Screens/redirect.dart';
 
 class BottomBarState extends StatefulWidget {
   const BottomBarState({Key? key}) : super(key: key);
@@ -13,7 +12,6 @@ class BottomBarState extends StatefulWidget {
 }
 
 class _BottomBarStateState extends State<BottomBarState> {
-  int currentindex = 1;
   @override
   Widget build(BuildContext context) {
     final AppStateManager appStateManager =
@@ -21,13 +19,25 @@ class _BottomBarStateState extends State<BottomBarState> {
     final ProfileManager profileManager =
         Provider.of<ProfileManager>(context, listen: false);
     return BottomNavigationBar(
-        currentIndex: currentindex,
+        currentIndex: appStateManager.currentTab,
         onTap: (i) {
           setState(() {
-            currentindex = i;
+            appStateManager.toTab(i);
 
-            if (i == 1) {
-              appStateManager.goto(MyPages.redirect, true);
+            if (i == 0) {
+              switch (profileManager.user!.role) {
+                case "voter":
+                  appStateManager.goto(MyPages.community, false);
+                  appStateManager.goto(MyPages.voter, true);
+                  break;
+                case "teacher":
+                  appStateManager.goto(MyPages.school, true);
+                  break;
+                default:
+              }
+            } else if (profileManager.user!.role == "voter" && i == 1) {
+              appStateManager.goto(MyPages.voter, false);
+              appStateManager.goto(MyPages.community, true);
             } else {
               Navigator.push(
                   context,
@@ -40,22 +50,26 @@ class _BottomBarStateState extends State<BottomBarState> {
         },
         selectedItemColor: Colors.blue,
         unselectedItemColor: Colors.grey,
-        selectedLabelStyle: TextStyle(
+        selectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 12,
         ),
-        unselectedLabelStyle: TextStyle(
+        unselectedLabelStyle: const TextStyle(
           fontWeight: FontWeight.w600,
           fontSize: 12,
         ),
         type: BottomNavigationBarType.fixed,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.email), label: 'inbox'),
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
-          BottomNavigationBarItem(
+        items: [
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
+          if (profileManager.user!.role != 'teacher')
+            const BottomNavigationBarItem(
+                icon: Icon(Icons.people), label: 'community'),
+          const BottomNavigationBarItem(
             icon: Icon(Icons.sms),
             label: 'message',
           ),
         ]);
   }
 }
+
+enum BottomNavPages { home, message, community }

@@ -56,7 +56,7 @@ class _UpdatesState extends State<Updates> {
   late Future<GetPosts> _getPosts;
   late Future<GetThemes> _listOfThemes;
   ScrollController _controller = ScrollController();
-  final PagingController _pagingController =
+  final PagingController<String, Posts> _pagingController =
       PagingController<String, Posts>(firstPageKey: "null");
 
   void _scrollListener() {
@@ -96,6 +96,12 @@ class _UpdatesState extends State<Updates> {
     });
   }
 
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
+
   Future<void> retrievePosts(String pageKey) async {
     GetPosts value;
     try {
@@ -128,110 +134,29 @@ class _UpdatesState extends State<Updates> {
             child: PagedListView.separated(
                 pagingController: _pagingController,
                 builderDelegate: PagedChildBuilderDelegate<Posts>(
-                  itemBuilder: (context, posts, index) {
-                    print(posts);
+                  itemBuilder: (context, value, index) {
                     return component.Post(
-                      post: posts,
+                      post: value,
                     );
                   },
-                  firstPageErrorIndicatorBuilder: (context) =>
-                      Center(child: Text('${_pagingController.error}')),
+                  firstPageErrorIndicatorBuilder: (context) => Center(
+                      child: Text(
+                          '${_pagingController.error}, swipe down to refresh')),
+                  noItemsFoundIndicatorBuilder: (context) {
+                    return availableCompetition(appStateManager, themeManager);
+                  },
                   newPageProgressIndicatorBuilder: (context) =>
-                      const CircularProgressIndicator(),
+                      const Center(child: CircularProgressIndicator()),
                 ),
-                separatorBuilder: (context, index) => const SizedBox(
-                      height: 16,
-                    )),
-            onRefresh: () => Future.sync(() => _pagingController.refresh())));
-    /* FutureBuilder<GetPosts>(
-            future: _getPosts,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                if (snapshot.hasData) {
-                  posts = snapshot.data!.posts;
-                  if (posts.isNotEmpty) {
-                    print(snapshot.data!.startId);
-                    startId = snapshot.data!.startId;
-                    lastId = snapshot.data!.lastId;
+                separatorBuilder: (context, index) {
+                  if (index % 3 == 0) {
+                    return availableCompetition(appStateManager, themeManager);
                   }
-                  return ListView(controller: _controller, children: [
-                    if (posts.isEmpty)
-                      availableCompetition(appStateManager, themeManager),
-                    if (posts.isNotEmpty)
-                      const ListTile(
-                        tileColor: Colors.white,
-                        title: Text(
-                          'Current Updates',
-                          style: TextStyle(color: Colors.blue),
-                        ),
-                      ),
-                    if (posts.isNotEmpty)
-                      Consumer<Postmanager>(builder: (context, value, child) {
-                        if (value.onUpdate) {
-                          posts = posts
-                              .where((element) =>
-                                  element.id != value.getFreshPost.id)
-                              .toList();
-
-                          posts.add(value.getFreshPost);
-                          //posts.add(value.getFreshPost);
-                          //value.resetUpdateEvent();
-                          return component.Post(post: posts[0]);
-                        } else {
-                          return component.Post(post: posts[0]);
-                        }
-                      }),
-                    if (posts.isNotEmpty)
-                      availableCompetition(appStateManager, themeManager),
-                    if (posts.isNotEmpty)
-                      Container(
-                        child: const ListTile(
-                          title: Text('Other Updates'),
-                          tileColor: Colors.white,
-                        ),
-                      ),
-                    if (posts.isNotEmpty)
-                      Consumer<Postmanager>(builder: (context, value, child) {
-                        if (value.onUpdate) {
-                          value.resetUpdateEvent();
-                        }
-                        if (value.morePosts) {
-                          List _posts = value.posts.posts;
-                          startId = value.posts.startId;
-                          lastId = value.posts.lastId;
-                          // allow our app to have maximum of 12 posts
-                          // at any moment. If there are more
-                          // discard old posts entirely
-                          if (posts.length == 12) {
-                            posts = _posts;
-                          } else {
-                            posts.addAll(_posts);
-                          }
-                          value.resetMorepostsEvent();
-                        }
-
-                        /* return ListView.builder(
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (context, index) {
-                            return component.Post(post: posts[index + 1]);
-                          },
-                          itemCount: posts.length - 1,
-                        );*/
-                        
-                      })
-                  ]);
-                } else {
-                  return const Center(
-                    child: Text('Something went wrong please come back again'),
+                  return const SizedBox(
+                    height: 16,
                   );
-                }
-              } else {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
-            }));*/
+                }),
+            onRefresh: () => Future.sync(() => _pagingController.refresh())));
   }
 
   Card availableCompetition(
@@ -285,7 +210,7 @@ class _UpdatesState extends State<Updates> {
         onPressed: () {
           // add theme
           themeManager.addTheme(Themes.fromMap(theme));
-          print(111);
+          appStateManager.goto(MyPages.voter, false);
           appStateManager.goto(MyPages.challenge, true);
         },
         child: Text(

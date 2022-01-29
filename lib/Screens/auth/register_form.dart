@@ -255,7 +255,7 @@ class _UserRegisterState extends State<UserRegister> {
                             break;
                           case "voter":
                           case "admin":
-                            appStatemanager.goto(MyPages.redirect, true);
+                            appStatemanager.goto(MyPages.voter, true);
                             appStatemanager.goto(MyPages.register, false);
 
                             break;
@@ -263,7 +263,7 @@ class _UserRegisterState extends State<UserRegister> {
                             appStatemanager.goto(MyPages.school, true);
                             break;
                         }
-                        appStatemanager.goto(MyPages.redirect, true);
+                        //  appStatemanager.goto(MyPages.redirect, true);
                       });
                     },
                     child: const Text(

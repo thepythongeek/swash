@@ -13,6 +13,7 @@ import 'package:swash/models/themes.dart';
 import 'package:swash/navigation/app_router.dart';
 import 'path.dart';
 // import 'Screens/community/challengedetail.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -69,6 +70,12 @@ class _MyAppState extends State<MyApp> {
       child: MaterialApp(
         restorationScopeId: 'asasfdsfsd',
         title: 'Swapp',
+        localizationsDelegates: const [
+          GlobalCupertinoLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate
+        ],
+        supportedLocales: const [Locale('en', ''), Locale('sw', '')],
         theme: ThemeData(
             // This is the theme of your application.
 

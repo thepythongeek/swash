@@ -11,6 +11,7 @@ import 'package:http/http.dart' as http;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 Future<dynamic> getImagesToVote(String? userId) async {
   final response = await http.post(
@@ -83,11 +84,10 @@ class VotePage extends StatefulWidget {
 class _VotePageState extends State<VotePage> {
   int _index = 0;
   bool _loading = true;
-  late Future<List> _comments;
+
   Path path = Path();
   late Future<dynamic> _imagesToVote;
 
-  String? _userId;
   late bool _voted;
   late String _imageId;
 
@@ -97,32 +97,11 @@ class _VotePageState extends State<VotePage> {
   String competitionName = "";
   String competitionTheme = "";
 
-  /* init(ProfileManager profileManager) async {
-    //_userId = await _storage.read(key: "user_id");
-
-    getImagesToVote(profileManager.user!.id).then((value) {
-      _imageList = value['images'];
-      WidgetsBinding.instance!.addPostFrameCallback((e) {
-        for (var image in _imageList) {
-          precacheImage(
-              NetworkImage('${AppPath.domain}${image['url']}'), context);
-        }
-      });
-
-      competitionName = value['competition_name'];
-      competitionTheme = value['competition_theme'];
-      setState(() {
-        _loading = false;
-      });
-    });
-  }*/
-
   @override
   void initState() {
     ProfileManager profileManager =
         Provider.of<ProfileManager>(context, listen: false);
     _imagesToVote = getImagesToVote(profileManager.user!.id);
-    //init(profileManager);
     super.initState();
   }
 
@@ -159,162 +138,163 @@ class _VotePageState extends State<VotePage> {
                 child: Text('No data for now to vote'),
               );
             }
-            return ListView(
-              children: [
-                Card(
-                    child: Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: <Widget>[
-                              Container(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 15),
-                                  child: Text(competitionTheme,
-                                      style: const TextStyle(fontSize: 15))),
-                              Container(
-                                padding: const EdgeInsets.all(10),
-                                child: CarouselSlider.builder(
-                                  itemCount: _imageList.length,
-                                  options: CarouselOptions(
-                                    autoPlay: false,
-                                    onPageChanged: onPageChange,
-                                    enlargeCenterPage: true,
-                                    viewportFraction: 1,
-                                    aspectRatio: 4 / 5,
-                                  ),
-                                  carouselController:
-                                      widget.buttonCarouselController,
-                                  itemBuilder: (context, index, realIdx) {
-                                    _index = index;
-
-                                    return AspectRatio(
-                                      aspectRatio: 4 / 5,
-                                      child: Image.network(
-                                          '${AppPath.domain}/${_imageList[index]['url']}',
-                                          fit: BoxFit.cover, errorBuilder:
-                                              (context, object, stacktrace) {
-                                        return const SizedBox(
-                                            height: 45, child: Placeholder());
-                                      }, width: 1000),
-                                    );
-                                  },
-                                ),
-                              ),
-                              Text(
-                                competitionName,
-                                style: const TextStyle(fontSize: 15.0),
-                              ),
-                              Container(
+            return ListView(children: [
+              Card(
+                  child: Padding(
+                      padding: const EdgeInsets.all(6.0),
+                      child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: <Widget>[
+                            Container(
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 10.0),
-                                child: Voting(
-                                  imageId: _imageList[_index]['id'],
-                                  carouselController:
-                                      widget.buttonCarouselController,
+                                    const EdgeInsets.symmetric(vertical: 15),
+                                child: Text(competitionTheme,
+                                    style: const TextStyle(fontSize: 15))),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              child: CarouselSlider.builder(
+                                itemCount: _imageList.length,
+                                options: CarouselOptions(
+                                  autoPlay: false,
+                                  onPageChanged: onPageChange,
+                                  enlargeCenterPage: true,
+                                  viewportFraction: 1,
+                                  aspectRatio: 4 / 5,
                                 ),
-                              ),
-                              Container(
-                                  padding: const EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                      border: Border.all(width: .24)),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Text(
-                                        'COMMENTS',
-                                        style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      const Padding(
-                                          padding: EdgeInsets.only(bottom: 5)),
-                                      TextFormField(
-                                        controller: userComment,
-                                        decoration: InputDecoration(
-                                          labelText: "Enter your comment here",
-                                          suffixIcon: Row(
-                                            mainAxisAlignment: MainAxisAlignment
-                                                .spaceBetween, // added line
-                                            mainAxisSize:
-                                                MainAxisSize.min, // added line
-                                            children: <Widget>[
-                                              IconButton(
-                                                icon: const Icon(Icons.send),
-                                                onPressed: () {
-                                                  (userComment.text == "")
-                                                      ? Toasty().show(
-                                                          'Empty comment is not allowed.',
-                                                          Toast.LENGTH_SHORT,
-                                                          ToastGravity.BOTTOM)
-                                                      : postComment(
-                                                              profileManager
-                                                                  .user!.id,
-                                                              userComment.text,
-                                                              _imageId)
-                                                          .then((value) {
-                                                          userComment.text = "";
-                                                          Toasty().show(
-                                                              value['message'],
-                                                              Toast
-                                                                  .LENGTH_SHORT,
-                                                              ToastGravity
-                                                                  .BOTTOM);
-                                                        });
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                      //
-                                      const Padding(
-                                          padding: EdgeInsets.only(bottom: 5)),
+                                carouselController:
+                                    widget.buttonCarouselController,
+                                itemBuilder: (context, index, realIdx) {
+                                  _index = index;
 
-                                      FutureBuilder<List>(
-                                          future: getComments(
-                                              _imageList[_index]['id']),
-                                          builder: (context, snapshot) {
-                                            if (snapshot.connectionState ==
-                                                ConnectionState.done) {
-                                              if (snapshot.hasError) {
-                                                return const Center(
-                                                    child: Text(
-                                                        'Oops something went wrong'));
-                                              }
-                                              var data = snapshot.data;
-                                              return ListView.builder(
-                                                  primary: false,
-                                                  shrinkWrap: true,
-                                                  physics:
-                                                      const NeverScrollableScrollPhysics(),
-                                                  itemCount: data!.length,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    return ListTile(
-                                                      leading: const Icon(
-                                                          Icons.person),
-                                                      title: Text(
-                                                          data[index]['name']),
-                                                      subtitle: Text(data[index]
-                                                          ['review']),
-                                                      trailing: Text(data[index]
-                                                          ['created_at']),
-                                                    );
-                                                  });
-                                            } else {
-                                              return const Center(
-                                                child:
-                                                    CircularProgressIndicator(),
-                                              );
-                                            }
-                                          })
-                                    ],
-                                  ))
-                            ])))
-              ],
-            );
+                                  return AspectRatio(
+                                    aspectRatio: 4 / 5,
+                                    child: CachedNetworkImage(
+                                        memCacheHeight: 400,
+                                        imageUrl:
+                                            '${AppPath.domain}/${_imageList[index]['url']}',
+                                        progressIndicatorBuilder:
+                                            (context, url, downloadProgress) {
+                                          return Column(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              CircularProgressIndicator(
+                                                value:
+                                                    downloadProgress.progress,
+                                              ),
+                                              const Text('Loading Image...')
+                                            ],
+                                          );
+                                        },
+                                        fit: BoxFit.cover,
+                                        errorWidget:
+                                            (context, object, stacktrace) {
+                                          return const Icon(Icons.error);
+                                        },
+                                        width: 1000),
+                                  );
+                                },
+                              ),
+                            ),
+                            Text(
+                              competitionName,
+                              style: const TextStyle(fontSize: 15.0),
+                            ),
+                            Text(
+                              '${_index + 1} of ${_imageList.length} images',
+                              textAlign: TextAlign.center,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Container(
+                              padding:
+                                  const EdgeInsets.symmetric(vertical: 10.0),
+                              child: Voting(
+                                imageId: _imageList[_index]['id'],
+                                carouselController:
+                                    widget.buttonCarouselController,
+                              ),
+                            )
+                          ]))),
+              Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(border: Border.all(width: .24)),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'COMMENTS',
+                        style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.bold),
+                      ),
+                      const Padding(padding: EdgeInsets.only(bottom: 5)),
+                      TextFormField(
+                        controller: userComment,
+                        decoration: InputDecoration(
+                          labelText: "Enter your comment here",
+                          suffixIcon: Row(
+                            mainAxisAlignment:
+                                MainAxisAlignment.spaceBetween, // added line
+                            mainAxisSize: MainAxisSize.min, // added line
+                            children: <Widget>[
+                              IconButton(
+                                icon: const Icon(Icons.send),
+                                onPressed: () {
+                                  (userComment.text == "")
+                                      ? Toasty().show(
+                                          'Empty comment is not allowed.',
+                                          Toast.LENGTH_SHORT,
+                                          ToastGravity.BOTTOM)
+                                      : postComment(profileManager.user!.id,
+                                              userComment.text, _imageId)
+                                          .then((value) {
+                                          userComment.text = "";
+                                          Toasty().show(
+                                              value['message'],
+                                              Toast.LENGTH_SHORT,
+                                              ToastGravity.BOTTOM);
+                                        });
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      //
+                      const Padding(padding: EdgeInsets.only(bottom: 5)),
+
+                      FutureBuilder<List>(
+                          future: getComments(_imageList[_index]['id']),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.done) {
+                              if (snapshot.hasError) {
+                                return const Center(
+                                    child: Text('Oops something went wrong'));
+                              }
+                              var data = snapshot.data;
+                              return ListView.builder(
+                                  primary: false,
+                                  shrinkWrap: true,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemCount: data!.length,
+                                  itemBuilder: (context, index) {
+                                    return ListTile(
+                                      leading: const Icon(Icons.person),
+                                      title: Text(data[index]['name']),
+                                      subtitle: Text(data[index]['review']),
+                                      trailing: Text(data[index]['created_at']),
+                                    );
+                                  });
+                            } else {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                          })
+                    ],
+                  ))
+            ]);
           } else {
             return const Center(
               child: Text('Something went wrong please try again later'),
@@ -332,6 +312,7 @@ class _VotePageState extends State<VotePage> {
 
 class Voting extends StatefulWidget {
   final String imageId;
+
   final CarouselController carouselController;
   const Voting(
       {Key? key, required this.imageId, required this.carouselController})
@@ -401,15 +382,13 @@ class _VotingState extends State<Voting> {
             children: [
               Expanded(
                 child: Slider(
-                    label: value.round().toString(),
+                    label: '${value.round()}%',
                     divisions: 100,
                     max: 100,
                     value: value,
                     onChanged: (double newvalue) {
                       setState(() {
                         value = newvalue;
-                        print(value);
-                        print('**');
                       });
                     }),
               ),
@@ -426,6 +405,9 @@ class _VotingState extends State<Voting> {
                           .then((value) {
                         Toasty().show('${value['message']}', Toast.LENGTH_SHORT,
                             ToastGravity.BOTTOM);
+                        widget.carouselController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.linear);
                         findFirstVoter(
                                 userId: profileManager.user!.id,
                                 competitionId: '9')

@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:ffi';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
@@ -13,7 +13,7 @@ import '../path.dart';
 
 class GetPosts {
   bool success;
-  List posts;
+  List<Posts> posts;
   String? startId;
   String? lastId;
 
@@ -25,7 +25,7 @@ class GetPosts {
 
   factory GetPosts.fromJson(
       {required Map<String, dynamic> json, BuildContext? context}) {
-    List posts = [];
+    List<Posts> posts = [];
     for (var post in json['message']) {
       posts.add(Posts.fromJson(json: post, context: context!));
     }

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:video_player/video_player.dart';
 
 import '../path.dart';
@@ -120,15 +121,27 @@ class _PostState extends State<Post> {
                             ? MediaPlayer(fileUrl: widget.post.imageLink)
                             : AspectRatio(
                                 aspectRatio: 4 / 3,
-                                child: Image.network(
-                                  widget.post.imageLink.startsWith('http')
+                                child: CachedNetworkImage(
+                                  memCacheHeight: 400,
+                                  imageUrl: widget.post.imageLink
+                                          .startsWith('http')
                                       ? widget.post.imageLink
                                       : '${AppPath.domain}/${widget.post.imageLink}',
-                                  errorBuilder: (context, object, stacktrace) {
-                                    return const SizedBox(
-                                      child: Placeholder(),
-                                      height: 45,
+                                  progressIndicatorBuilder:
+                                      (context, url, downloadProgress) {
+                                    return Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CircularProgressIndicator(
+                                          value: downloadProgress.progress,
+                                        ),
+                                        const Text('Loading Image...')
+                                      ],
                                     );
+                                  },
+                                  errorWidget: (context, object, stacktrace) {
+                                    return const Icon(Icons.error);
                                   },
                                   fit: BoxFit.cover,
                                 ),

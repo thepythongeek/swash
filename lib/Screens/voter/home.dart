@@ -69,6 +69,8 @@ class _VoterState extends State<Voter> with SingleTickerProviderStateMixin {
               initialIndex: 0,
               length: 4,
               child: Scaffold(
+                floatingActionButtonLocation:
+                    FloatingActionButtonLocation.startDocked,
                 floatingActionButton: prize
                     ? AnimatedButton(
                         animation: animation, prize: snapshot.data![1])
