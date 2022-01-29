@@ -68,7 +68,7 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MaterialApp(
         restorationScopeId: 'asasfdsfsd',
-        title: 'Swapp',
+        title: 'swash',
         theme: ThemeData(
             // This is the theme of your application.
 
