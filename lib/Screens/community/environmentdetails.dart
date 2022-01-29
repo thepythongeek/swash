@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:swash/models/appmanager.dart';
@@ -35,7 +36,25 @@ class EnvironmentDetails extends StatelessWidget {
           children: [
             Container(
               color: Colors.black.withOpacity(.45),
-              child: Image.network('${AppPath.domain}/${environment.imageUrl}'),
+              child: AspectRatio(
+                  aspectRatio: 4 / 5,
+                  child: CachedNetworkImage(
+                    imageUrl: '${AppPath.domain}/${environment.imageUrl}',
+                    progressIndicatorBuilder: (context, url, downloadProgress) {
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            value: downloadProgress.progress,
+                          ),
+                          const Text('Loading Image...')
+                        ],
+                      );
+                    },
+                    errorWidget: (context, object, stacktrace) {
+                      return const Icon(Icons.error);
+                    },
+                  )),
             ),
             Container(
               padding: const EdgeInsets.all(20),

@@ -1,5 +1,3 @@
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:swash/Screens/School/main.dart';
@@ -15,7 +13,6 @@ class Ambassador extends StatefulWidget {
 class _AmbassadorState extends State<Ambassador> {
   @override
   Widget build(BuildContext context) {
-    print('989');
     return Scaffold(
         body: ListView(
       primary: true,
@@ -127,7 +124,7 @@ class _AmbassadorState extends State<Ambassador> {
     TextStyle fontsize = const TextStyle(fontSize: 12);
     return ListView.builder(
         shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
+        physics: const NeverScrollableScrollPhysics(),
         itemCount: voters.length,
         itemBuilder: (context, index) {
           return Card(
@@ -137,7 +134,7 @@ class _AmbassadorState extends State<Ambassador> {
               child: Row(
                 children: [
                   Text(
-                    '$index',
+                    '${index + 1}',
                     textAlign: TextAlign.center,
                     style: fontsize,
                   ),
@@ -192,9 +189,11 @@ class _ButtonWidgetState extends State<ButtonWidget> {
       _details = value.competitions + [activeCompetition, general];
       Provider.of<CompetitionManager>(context, listen: false)
           .addVotingId(_details[0]['id']);
-      setState(() {
-        _loading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
     });
     super.initState();
   }
@@ -218,7 +217,6 @@ class _ButtonWidgetState extends State<ButtonWidget> {
                     value: value['id'], child: Text(value['name']));
               }).toList(),
         onChanged: (String? newValue) {
-          print(newValue);
           setState(() {
             _selectedMenuItem = newValue;
             Provider.of<CompetitionManager>(context, listen: false)

@@ -12,9 +12,11 @@ import '../Screens/auth/signin.dart';
 
 class AppStateManager extends ChangeNotifier {
   final NavigationState _navigationState = NavigationState();
+  int _currentTab = 0;
 
   bool _showComments = false;
   bool _isInitialised = false;
+  int get currentTab => _currentTab;
   Position? _position;
   int? _expiringDuration;
   DateTime? _date;
@@ -35,6 +37,10 @@ class AppStateManager extends ChangeNotifier {
   int? get duration => _expiringDuration;
 
   NavigationState get navigation => _navigationState;
+
+  void toTab(int index) {
+    _currentTab = index;
+  }
 
   void addStream(IOWebSocketChannel channel, Stream<dynamic> stream) {
     _channel = channel;

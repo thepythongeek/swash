@@ -57,8 +57,9 @@ Future<String> savePDF() async {
   final tempDir = await getExternalStorageDirectory();
   print(tempDir!.path);
   String path = tempDir.path.split('Android')[0] + 'Download';
+  print(path);
   final file = File('$path/swash.pdf');
   await file.writeAsBytes(await pdf.save());
   String s = 'Android';
-  return tempDir.path + '/swash.pdf';
+  return path;
 }

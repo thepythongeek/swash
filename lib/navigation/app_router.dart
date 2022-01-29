@@ -58,6 +58,7 @@ class RouteManager extends RouterDelegate
           }
           if (route.settings.name == MyPages.challenge) {
             appStateManager.goto(MyPages.challenge, false);
+            // appStateManager.goto(MyPages.voter, true);
           }
           if (route.settings.name == MyPages.login) {
             appStateManager.goto(MyPages.login, false);

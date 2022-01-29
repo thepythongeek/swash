@@ -1,17 +1,17 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:swash/components/components.dart';
-import 'package:swash/models/appmanager.dart';
+
 import 'package:swash/models/models.dart';
-import 'package:swash/models/pages.dart';
 import 'package:swash/models/themes.dart';
 import 'package:swash/object/get_competition_details.dart';
 import 'package:swash/object/subscribe_competition.dart';
-import 'package:swash/object/upload_photo.dart';
+
 import 'package:swash/utility/location.dart';
 import '../path.dart';
 
@@ -31,20 +31,18 @@ class ChallengeDetail extends StatefulWidget {
 class _ChallengeDetailState extends State<ChallengeDetail> {
   List<Map<String, dynamic>> _images = [];
   GetCompetitionDetails? _details;
-  ImagePicker _picker = ImagePicker();
+  final ImagePicker _picker = ImagePicker();
   XFile? _imageFile;
   static List roles = ['admin', 'voter'];
 
   @override
   void initState() {
-    print(111);
     ProfileManager profileManager =
         Provider.of<ProfileManager>(context, listen: false);
     ThemeManager themeManager =
         Provider.of<ThemeManager>(context, listen: false);
-    print(profileManager.user!.profile!.school!['id']);
+
     if (!roles.contains(profileManager.user!.role)) {
-      print(profileManager.user!.role);
       getCompetitionDetails(
               themeManager.getTheme.id,
               profileManager.user!.role == 'teacher'
@@ -54,7 +52,6 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
         setState(() {
           _details = value;
           _images = value.images;
-          print(_images);
         });
       });
     }
@@ -65,7 +62,7 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
   Widget build(BuildContext context) {
     final ThemeManager themeManager =
         Provider.of<ThemeManager>(context, listen: false);
-    print(themeManager.getTheme.status);
+
     final AppStateManager appStateManager =
         Provider.of<AppStateManager>(context, listen: false);
     final ProfileManager profileManager =
@@ -80,35 +77,35 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
       ),
       body: ListView(children: [
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           color: const Color.fromRGBO(232, 232, 232, 10),
           child: const Text('THEME:', style: TextStyle(fontSize: 20)),
         ),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: Text(themeManager.getTheme.theme),
         ),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           color: const Color.fromRGBO(232, 232, 232, 10),
           child: const Text('CHALLENGE NAME:', style: TextStyle(fontSize: 20)),
         ),
         Container(
-          margin: EdgeInsets.all(5),
-          padding: EdgeInsets.all(15),
+          margin: const EdgeInsets.all(5),
+          padding: const EdgeInsets.all(15),
           child: Text(themeManager.getTheme.title),
         ),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           color: const Color.fromRGBO(232, 232, 232, 10),
           child: const Text('CRITERIA REWARD:', style: TextStyle(fontSize: 20)),
         ),
         Container(
-          padding: EdgeInsets.all(10),
+          padding: const EdgeInsets.all(10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
-              Text(
+              const Text(
                 'Criteria: ',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -116,13 +113,13 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
               ),
               Text(
                 themeManager.getTheme.criteria,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(top: 20.0),
-                child: Text(
+                margin: const EdgeInsets.only(top: 20.0),
+                child: const Text(
                   'Reward:',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
@@ -131,7 +128,7 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
               ),
               Text(
                 themeManager.getTheme.reward,
-                style: TextStyle(
+                style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               )
@@ -145,13 +142,13 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Container(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       color: const Color.fromRGBO(232, 232, 232, 10),
                       child: const Text('SUBSCRIPTION:',
                           style: TextStyle(fontSize: 20)),
                     ),
                     Container(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
@@ -163,7 +160,7 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
                               alignment: AlignmentDirectional.center,
                               child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
-                                      padding: EdgeInsets.symmetric(
+                                      padding: const EdgeInsets.symmetric(
                                           horizontal: 80.0)),
                                   onPressed: _details!.isSubscribed
                                       ? null
@@ -193,12 +190,12 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
                       ),
                     ),
                     Container(
-                      padding: EdgeInsets.all(10),
+                      padding: const EdgeInsets.all(10),
                       color: const Color.fromRGBO(232, 232, 232, 10),
                       child: const Text('IMAGE SHARED:',
                           style: TextStyle(fontSize: 20)),
                     ),
-                    Container(
+                    SizedBox(
                         height: MediaQuery.of(context).size.height / 4,
                         child: ListView.builder(
                             itemCount: _images.length,
@@ -207,8 +204,26 @@ class _ChallengeDetailState extends State<ChallengeDetail> {
                               return Card(
                                 color: Colors.black.withOpacity(.65),
                                 elevation: 12,
-                                child: Image.network(
-                                  '${AppPath.domain}/${_images[index]['url']}',
+                                child: CachedNetworkImage(
+                                  memCacheHeight: 400,
+                                  imageUrl:
+                                      '${AppPath.domain}/${_images[index]['url']}',
+                                  progressIndicatorBuilder:
+                                      (context, url, downloadProgress) {
+                                    return Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        CircularProgressIndicator(
+                                          value: downloadProgress.progress,
+                                        ),
+                                        const Text('Loading Image...')
+                                      ],
+                                    );
+                                  },
+                                  errorWidget: (context, object, stacktrace) {
+                                    return const Icon(Icons.error);
+                                  },
                                   fit: BoxFit.contain,
                                 ),
                               );

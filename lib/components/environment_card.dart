@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:path/path.dart' as p;
@@ -37,16 +38,27 @@ class _EnvironmentCardState extends State<EnvironmentCard> {
                 children: [
                   // a column and an image
                   Expanded(
-                      child: ClipRRect(
-                    child: Image.network(
-                      widget.environment.imageUrl.startsWith('https')
+                      child: AspectRatio(
+                    aspectRatio: 4 / 5,
+                    child: CachedNetworkImage(
+                      memCacheHeight: 400,
+                      imageUrl: widget.environment.imageUrl.startsWith('https')
                           ? widget.environment.imageUrl
                           : '${AppPath.domain}/${widget.environment.imageUrl}',
-                      errorBuilder: (context, object, stacktrace) {
-                        return const SizedBox(
-                          child: Placeholder(),
-                          height: 45,
+                      progressIndicatorBuilder:
+                          (context, url, downloadProgress) {
+                        return Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              value: downloadProgress.progress,
+                            ),
+                            const Text('Loading Image...')
+                          ],
                         );
+                      },
+                      errorWidget: (context, object, stacktrace) {
+                        return const Icon(Icons.error);
                       },
                       fit: BoxFit.cover,
                     ),
