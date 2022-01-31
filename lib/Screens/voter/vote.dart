@@ -12,6 +12,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:web_socket_channel/io.dart';
 
 Future<dynamic> getImagesToVote(String? userId) async {
   final response = await http.post(
@@ -83,7 +84,6 @@ class VotePage extends StatefulWidget {
 
 class _VotePageState extends State<VotePage> {
   int _index = 0;
-  bool _loading = true;
 
   Path path = Path();
   late Future<dynamic> _imagesToVote;
@@ -329,6 +329,8 @@ class _VotingState extends State<Voting> {
   Widget build(BuildContext context) {
     ProfileManager profileManager =
         Provider.of<ProfileManager>(context, listen: false);
+    IOWebSocketChannel channel =
+        Provider.of<AppStateManager>(context, listen: false).channel!;
     return !vote
         ? Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -414,6 +416,8 @@ class _VotingState extends State<Voting> {
                             .then((value) {
                           Toasty()
                               .show(value, Toast.LENGTH_LONG, ToastGravity.TOP);
+                          channel.sink.add(
+                              jsonEncode({"event": "prize", "message": value}));
                         });
                       });
                       setState(() {

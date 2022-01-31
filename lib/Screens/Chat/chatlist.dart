@@ -23,15 +23,16 @@ class ChatList extends StatefulWidget {
 class _ChatListState extends State<ChatList> {
 //late Future<List<m.Conversation>> conversations;
   List<m.Conversation>? conversation;
-  late IOWebSocketChannel channel;
   late Stream<dynamic> channelStream;
+  late IOWebSocketChannel channel;
 
   @override
   void initState() {
     // conversations = getConversations(
     //    userId: Provider.of<m.ProfileManager>(context, listen: false).user!.id);
-    channel = IOWebSocketChannel.connect(
-        Uri.parse('ws://www.swashcompetition.com:8080'));
+    channel = Provider.of<m.AppStateManager>(context, listen: false).channel!;
+    channelStream =
+        Provider.of<m.AppStateManager>(context, listen: false).channelStream!;
     // attempt to use 'register' event
     channel.sink
         .add(jsonEncode({"event": "register", "user_id": widget.userId}));
@@ -40,7 +41,6 @@ class _ChatListState extends State<ChatList> {
         .add(jsonEncode({"event": "connect", "user_id": widget.userId}));
 
 //channel = channel.changeStream((p0) => p0.asBroadcastStream());
-    channelStream = channel.stream.asBroadcastStream();
     channelStream.listen((event) {
       //channel.sink.add('helooo from dart');
       print(event);

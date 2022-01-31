@@ -5,6 +5,7 @@ import 'package:swash/Screens/redirect.dart';
 import 'package:swash/models/models.dart';
 
 import 'package:flutter/material.dart';
+import 'package:swash/models/prize.dart';
 import 'package:web_socket_channel/io.dart';
 import '../Screens/front_page.dart';
 import '../Screens/auth/login_form.dart';
@@ -12,6 +13,7 @@ import '../Screens/auth/signin.dart';
 
 class AppStateManager extends ChangeNotifier {
   final NavigationState _navigationState = NavigationState();
+  Prize? _prize;
   int _currentTab = 0;
 
   bool _showComments = false;
@@ -20,6 +22,7 @@ class AppStateManager extends ChangeNotifier {
   Position? _position;
   int? _expiringDuration;
   DateTime? _date;
+  Prize? get prize => _prize;
   IOWebSocketChannel? _channel;
   Stream<dynamic>? _channelStream;
 
@@ -40,6 +43,10 @@ class AppStateManager extends ChangeNotifier {
 
   void toTab(int index) {
     _currentTab = index;
+  }
+
+  void addPrize(Prize value) {
+    _prize = value;
   }
 
   void addStream(IOWebSocketChannel channel, Stream<dynamic> stream) {

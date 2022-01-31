@@ -1,3 +1,7 @@
+import 'dart:convert';
+
+import 'package:provider/provider.dart';
+import 'package:swash/models/models.dart';
 import 'package:swash/models/pages.dart';
 import 'package:swash/models/prize.dart';
 import 'package:swash/object/prize.dart';
@@ -23,7 +27,6 @@ class Voter extends StatefulWidget {
 
 class _VoterState extends State<Voter> with SingleTickerProviderStateMixin {
   late Animation<double> animation;
-  late Future<List> isPrize;
   late AnimationController animationController;
   bool prize = false;
 
@@ -36,7 +39,6 @@ class _VoterState extends State<Voter> with SingleTickerProviderStateMixin {
     animation =
         Tween<double>(begin: -360, end: 360).animate(animationController);
     animationController.forward();
-    isPrize = prizeInfo();
     super.initState();
   }
 
@@ -46,88 +48,83 @@ class _VoterState extends State<Voter> with SingleTickerProviderStateMixin {
     super.dispose();
   }
 
-  Future<List> prizeInfo() async {
-    List data = [];
-    var isPrize = await isTherePrize();
-    data.add(isPrize);
-    if (isPrize) {
-      data.add(await getPrize());
-    }
-
-    return data;
-  }
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List>(
-        future: isPrize,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            bool _isPrize = snapshot.data![0];
-            prize = _isPrize;
-            return DefaultTabController(
-              initialIndex: 0,
-              length: 4,
-              child: Scaffold(
-                floatingActionButtonLocation:
-                    FloatingActionButtonLocation.startDocked,
-                floatingActionButton: prize
-                    ? AnimatedButton(
-                        animation: animation, prize: snapshot.data![1])
-                    : null,
-                bottomNavigationBar: const BottomBarState(),
-                backgroundColor: Colors.grey[200],
-                drawer: const MainDrawer(),
-                appBar: AppBar(
-                  bottom: const TabBar(
-                    labelPadding: EdgeInsets.zero,
-                    tabs: [
-                      Text(
-                        'VOTE',
-                        style: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        'RESULT',
-                        style: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        'EVENTS',
-                        style: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                      Text(
-                        'AMBASSADORS',
-                        style: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  title: const Text('SWASH Competition'),
-                ),
-                body: TabBarView(
-                  children: [
-                    VotePage(),
-                    const Results(),
-                    const Updates(),
-                    const Ambassador()
-                  ],
+    AppStateManager appStateManager =
+        Provider.of<AppStateManager>(context, listen: false);
+    return DefaultTabController(
+      initialIndex: 0,
+      length: 4,
+      child: Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.startDocked,
+        floatingActionButton: appStateManager.prize != null
+            ? AnimatedButton(
+                animation: animation, prize: appStateManager.prize!)
+            : null,
+        bottomNavigationBar: const BottomBarState(),
+        backgroundColor: Colors.grey[200],
+        drawer: const MainDrawer(),
+        appBar: AppBar(
+          actions: [
+            StreamBuilder<dynamic>(
+                stream: appStateManager.channelStream,
+                builder: (context, snapshot) {
+                  bool alerts;
+
+                  if (snapshot.hasData) {
+                    Map<String, dynamic> data = jsonDecode(snapshot.data);
+                    print(data);
+                    alerts = true;
+                  } else {
+                    //  ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(content: Text('${snapshot.data}')));
+                    alerts = false;
+                  }
+                  return BellIcon(alerts: alerts);
+                })
+          ],
+          bottom: const TabBar(
+            isScrollable: true,
+            labelPadding: EdgeInsets.all(9),
+            tabs: [
+              Text(
+                'VOTE',
+                style: TextStyle(
+                  fontSize: 12,
                 ),
               ),
-            );
-          }
-          if (snapshot.hasError) {
-            return Text('${snapshot.data}');
-          }
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
-        });
+              Text(
+                'RESULT',
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                'EVENTS',
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+              Text(
+                'AMBASSADORS',
+                style: TextStyle(
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+          title: const Text('SWASH Competition'),
+        ),
+        body: TabBarView(
+          children: [
+            VotePage(),
+            const Results(),
+            const Updates(),
+            const Ambassador()
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -161,5 +158,23 @@ class _AnimatedButtonState extends State<AnimatedButton> {
                 child: Icon(Icons.ring_volume_rounded)),
           );
         });
+  }
+}
+
+class BellIcon extends StatefulWidget {
+  final bool alerts;
+  const BellIcon({Key? key, required this.alerts}) : super(key: key);
+
+  @override
+  _BellIconState createState() => _BellIconState();
+}
+
+class _BellIconState extends State<BellIcon> {
+  @override
+  Widget build(BuildContext context) {
+    return Icon(
+      Icons.notifications,
+      color: widget.alerts ? Colors.white : Colors.blue,
+    );
   }
 }
