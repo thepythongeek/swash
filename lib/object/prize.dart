@@ -9,8 +9,6 @@ Future<bool> isTherePrize() async {
     Uri.parse('${AppPath.domain}/prize.php'),
   );
 
-  print(response.body);
-
   Map<String, dynamic> data = jsonDecode(response.body);
   if (response.statusCode == 200) {
     if (data['status']) {
@@ -25,7 +23,7 @@ Future<bool> isTherePrize() async {
 
 Future<Prize> getPrize() async {
   Response response = await get(Uri.parse(AppPath.api + '/get_prize.php'));
-  print(response.body);
+
   Map<String, dynamic> data = jsonDecode(response.body);
   if (response.statusCode == 200) {
     if (data['status']) {

@@ -11,6 +11,8 @@ import 'package:swash/models/message_manager.dart';
 import 'package:swash/models/models.dart';
 import 'package:swash/models/themes.dart';
 import 'package:swash/navigation/app_router.dart';
+import 'package:web_socket_channel/io.dart';
+import 'dart:convert';
 import 'path.dart';
 // import 'Screens/community/challengedetail.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -35,6 +37,8 @@ class _MyAppState extends State<MyApp> {
   final ThemeManager themeManager = ThemeManager();
   final CommentManager commentManager = CommentManager();
   final ProfileManager profileManager = ProfileManager();
+  late IOWebSocketChannel channel;
+  late Stream<dynamic> channelStream;
 
   @override
   void initState() {
@@ -45,7 +49,10 @@ class _MyAppState extends State<MyApp> {
         fileManager: fileManager,
         postmanager: postmanager,
         themeManager: themeManager);
-
+    channel = IOWebSocketChannel.connect(
+        Uri.parse('ws://www.swashcompetition.com:8080'));
+    channelStream = channel.stream.asBroadcastStream();
+    appStateManager.addStream(channel, channelStream);
     super.initState();
   }
 
@@ -69,7 +76,7 @@ class _MyAppState extends State<MyApp> {
       ],
       child: MaterialApp(
         restorationScopeId: 'asasfdsfsd',
-        title: 'Swapp',
+        title: 'Swash',
         localizationsDelegates: const [
           GlobalCupertinoLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,

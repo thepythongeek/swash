@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:swash/models/models.dart';
+import 'package:swash/models/prize.dart';
 import 'package:swash/object/get_profile.dart';
+import 'package:swash/object/prize.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -41,6 +43,10 @@ class _SplashScreenState extends State<SplashScreen> {
   void initialise() async {
     FlutterSecureStorage storage = FlutterSecureStorage();
     Map<String, String> keys = await storage.readAll();
+
+    // attempt to find whether a prize has been set
+    await findPrize();
+
     if (keys.isEmpty) {
       Timer(const Duration(seconds: 1), () {
         Provider.of<AppStateManager>(context, listen: false).initiliase();
@@ -52,20 +58,21 @@ class _SplashScreenState extends State<SplashScreen> {
       ProfileManager profileManager =
           Provider.of<ProfileManager>(context, listen: false);
       profileManager.addUser(User(id: keys['id']!, role: keys['role']!));
-      print(profileManager.user!.id);
-      print('22');
       profileManager.loginUser();
+
       // get user profile if he has one
-
       GetProfile profile = await getProfile(keys['id']!, "null");
-
       profileManager.updateprofile(profile.profile);
-      print(profileManager.user!.profile!.id);
-      Timer(const Duration(seconds: 5), () {
+
+      // attempt to find whether a prize has been set
+      await findPrize();
+
+      Timer(const Duration(seconds: 1), () {
         AppStateManager appStateManager =
             Provider.of<AppStateManager>(context, listen: false);
         appStateManager.initiliase();
-        print(keys['role']);
+        // move to different screens depending
+        // on user role
         switch (keys['role']) {
           case "ward":
             appStateManager.goto(MyPages.ward, true);
@@ -81,6 +88,14 @@ class _SplashScreenState extends State<SplashScreen> {
             break;
         }
       });
+    }
+  }
+
+  Future<void> findPrize() async {
+    bool _isTherePrize = await isTherePrize();
+    if (_isTherePrize) {
+      Prize prize = await getPrize();
+      Provider.of<AppStateManager>(context, listen: false).addPrize(prize);
     }
   }
 }

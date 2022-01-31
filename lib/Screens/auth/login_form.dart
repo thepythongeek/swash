@@ -24,6 +24,7 @@ Future<dynamic> postSignin(String email, String password, String domain) async {
       "password": password,
     },
   );
+  print(response.body);
   if (response.statusCode == 200) {
     return json.decode(response.body);
   } else {
