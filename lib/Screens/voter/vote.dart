@@ -94,7 +94,7 @@ class _VotePageState extends State<VotePage> {
   var count = 0;
   List _imageList = [];
   var _listOfComments = [];
-  String competitionName = "";
+  String competitionId = "";
   String competitionTheme = "";
 
   @override
@@ -131,6 +131,8 @@ class _VotePageState extends State<VotePage> {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           if (snapshot.hasData) {
+            var data = snapshot.data!;
+            competitionId = data['competition_id'];
             _imageList = snapshot.data!['images'];
 
             if (_imageList.isEmpty) {
@@ -148,8 +150,12 @@ class _VotePageState extends State<VotePage> {
                             Container(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 15),
-                                child: Text(competitionTheme,
-                                    style: const TextStyle(fontSize: 15))),
+                                child: Text(
+                                    data['competition_caption'] +
+                                        ' ${_imageList[_index]['qns_one']}, ${_imageList[_index]['qn_two']}',
+                                    textAlign: TextAlign.center,
+                                    softWrap: true,
+                                    style: const TextStyle(fontSize: 18))),
                             Container(
                               padding: const EdgeInsets.all(10),
                               child: CarouselSlider.builder(
@@ -166,39 +172,45 @@ class _VotePageState extends State<VotePage> {
                                 itemBuilder: (context, index, realIdx) {
                                   _index = index;
 
-                                  return AspectRatio(
-                                    aspectRatio: 4 / 5,
-                                    child: CachedNetworkImage(
-                                        memCacheHeight: 400,
-                                        imageUrl:
-                                            '${AppPath.domain}/${_imageList[index]['url']}',
-                                        progressIndicatorBuilder:
-                                            (context, url, downloadProgress) {
-                                          return Column(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              CircularProgressIndicator(
-                                                value:
-                                                    downloadProgress.progress,
-                                              ),
-                                              const Text('Loading Image...')
-                                            ],
-                                          );
-                                        },
-                                        fit: BoxFit.cover,
-                                        errorWidget:
-                                            (context, object, stacktrace) {
-                                          return const Icon(Icons.error);
-                                        },
-                                        width: 1000),
+                                  return ClipRRect(
+                                    borderRadius: BorderRadius.circular(10),
+                                    child: AspectRatio(
+                                      aspectRatio: 4 / 5,
+                                      child: CachedNetworkImage(
+                                          memCacheHeight: 400,
+                                          imageUrl:
+                                              '${AppPath.domain}/${_imageList[index]['url']}',
+                                          progressIndicatorBuilder:
+                                              (context, url, downloadProgress) {
+                                            return Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                CircularProgressIndicator(
+                                                  value:
+                                                      downloadProgress.progress,
+                                                ),
+                                                const Text('Loading Image...')
+                                              ],
+                                            );
+                                          },
+                                          fit: BoxFit.cover,
+                                          errorWidget:
+                                              (context, object, stacktrace) {
+                                            return const Icon(Icons.error);
+                                          },
+                                          width: 1000),
+                                    ),
                                   );
                                 },
                               ),
                             ),
                             Text(
-                              competitionName,
-                              style: const TextStyle(fontSize: 15.0),
+                              data['competition_name'] + '?',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 18.0,
+                              ),
                             ),
                             Text(
                               '${_index + 1} of ${_imageList.length} images',
@@ -210,6 +222,7 @@ class _VotePageState extends State<VotePage> {
                               padding:
                                   const EdgeInsets.symmetric(vertical: 10.0),
                               child: Voting(
+                                competitionId: competitionId,
                                 imageId: _imageList[_index]['id'],
                                 carouselController:
                                     widget.buttonCarouselController,
@@ -312,10 +325,13 @@ class _VotePageState extends State<VotePage> {
 
 class Voting extends StatefulWidget {
   final String imageId;
-
+  final String competitionId;
   final CarouselController carouselController;
   const Voting(
-      {Key? key, required this.imageId, required this.carouselController})
+      {Key? key,
+      required this.imageId,
+      required this.competitionId,
+      required this.carouselController})
       : super(key: key);
 
   @override
@@ -410,7 +426,7 @@ class _VotingState extends State<Voting> {
                             curve: Curves.linear);
                         findFirstVoter(
                                 userId: profileManager.user!.id,
-                                competitionId: '9')
+                                competitionId: widget.competitionId)
                             .then((value) {
                           Toasty()
                               .show(value, Toast.LENGTH_LONG, ToastGravity.TOP);

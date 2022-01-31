@@ -62,7 +62,7 @@ class _DropDownState extends State<DropDown> {
             Provider.of<CompetitionManager>(context, listen: false)
                 .addId(_listCompetition[0]['id']);
             return displayDropDownButton(
-                _listCompetition, _listCompetition[0]['name']);
+                _listCompetition, _listCompetition[0]['theme']);
           } else if (snapshot.hasError) {
             return const Center(
               child: Text('something is wrong please try again'),
@@ -93,7 +93,7 @@ class _DropDownState extends State<DropDown> {
   }
 
   DropdownMenuItem<String> buildDropdownMenuItem(data) {
-    return DropdownMenuItem(value: data['id'], child: Text(data['name']));
+    return DropdownMenuItem(value: data['id'], child: Text(data['theme']));
   }
 }
 
@@ -152,7 +152,7 @@ class _ResultsPageState extends State<Results> {
         DataCell(Text('${count++}')),
         DataCell(Text(school['school_name'])),
         DataCell(Text(school['built'] ?? '-')),
-        DataCell(Text(school['score'])),
+        DataCell(Text(double.parse(school['score']).round().toString())),
         DataCell(
           Rating(rating: findRating(school['score'])),
         ),

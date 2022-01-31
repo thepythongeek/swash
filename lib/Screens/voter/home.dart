@@ -148,6 +148,7 @@ class _AnimatedButtonState extends State<AnimatedButton> {
         animation: widget.animation,
         builder: (context, child) {
           return FloatingActionButton(
+            mini: true,
             onPressed: () {
               showDialog(
                   context: context,
@@ -158,7 +159,10 @@ class _AnimatedButtonState extends State<AnimatedButton> {
             backgroundColor: Colors.amber,
             child: Transform.rotate(
                 angle: (widget.animation.value / 360) * (2 * pi),
-                child: Icon(Icons.ring_volume_rounded)),
+                child: Image.asset(
+                  'images/gift.jpg',
+                  fit: BoxFit.fill,
+                )),
           );
         });
   }
