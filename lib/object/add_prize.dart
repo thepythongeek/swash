@@ -15,8 +15,9 @@ Future<String> addPrize(
   }
   StreamedResponse response = await request.send();
   if (response.statusCode == 200) {
-    Map<String, dynamic> data =
-        jsonDecode(await response.stream.bytesToString());
+    var body = await response.stream.bytesToString();
+    print(body);
+    Map<String, dynamic> data = jsonDecode(body);
     if (data['status']) {
       return data['message'];
     } else {

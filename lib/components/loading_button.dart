@@ -32,7 +32,10 @@ class _LoadingButtonState extends State<LoadingButton> {
             : null,
         style: widget.style, //widget.style,
         child: !_loading
-            ? widget.child
+            ? Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: widget.child,
+              )
             : const CircularProgressIndicator(
                 backgroundColor: Colors.white,
               ));

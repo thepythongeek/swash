@@ -41,11 +41,7 @@ class _ChatListState extends State<ChatList> {
         .add(jsonEncode({"event": "connect", "user_id": widget.userId}));
 
 //channel = channel.changeStream((p0) => p0.asBroadcastStream());
-    channelStream.listen((event) {
-      //channel.sink.add('helooo from dart');
-      print(event);
-      print('11');
-    });
+
     Provider.of<m.AppStateManager>(context, listen: false)
         .addStream(channel, channelStream);
     super.initState();

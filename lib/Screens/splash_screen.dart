@@ -1,8 +1,8 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
+import 'package:swash/components/upload.dart';
 import 'package:swash/models/models.dart';
 import 'package:swash/models/prize.dart';
 import 'package:swash/object/get_profile.dart';
@@ -24,12 +24,10 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          color: Colors.white60,
-          child: Center(child: Image.asset('images/swash.JPG')),
-        ),
+    return Container(
+      color: const Color(0xFF0478c2),
+      child: Center(
+        child: Image.asset('images/swash.png'),
       ),
     );
   }
@@ -64,9 +62,6 @@ class _SplashScreenState extends State<SplashScreen> {
       GetProfile profile = await getProfile(keys['id']!, "null");
       profileManager.updateprofile(profile.profile);
 
-      // attempt to find whether a prize has been set
-      await findPrize();
-
       Timer(const Duration(seconds: 1), () {
         AppStateManager appStateManager =
             Provider.of<AppStateManager>(context, listen: false);
@@ -95,7 +90,10 @@ class _SplashScreenState extends State<SplashScreen> {
     bool _isTherePrize = await isTherePrize();
     if (_isTherePrize) {
       Prize prize = await getPrize();
+      print(11);
       Provider.of<AppStateManager>(context, listen: false).addPrize(prize);
+    } else {
+      Provider.of<AppStateManager>(context, listen: false).addPrize(null);
     }
   }
 }

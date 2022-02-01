@@ -60,13 +60,13 @@ class _BottomBarStateState extends State<BottomBarState> {
         ),
         type: BottomNavigationBarType.fixed,
         items: [
-          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
+          const BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           if (profileManager.user!.role != 'teacher')
             const BottomNavigationBarItem(
-                icon: Icon(Icons.people), label: 'community'),
+                icon: Icon(Icons.people), label: 'Jamii'),
           const BottomNavigationBarItem(
             icon: Icon(Icons.sms),
-            label: 'message',
+            label: 'Message',
           ),
         ]);
   }

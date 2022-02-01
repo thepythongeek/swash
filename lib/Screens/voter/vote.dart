@@ -430,10 +430,8 @@ class _VotingState extends State<Voting> {
                                 userId: profileManager.user!.id,
                                 competitionId: widget.competitionId)
                             .then((value) {
-                          Toasty()
-                              .show(value, Toast.LENGTH_LONG, ToastGravity.TOP);
-                          channel.sink.add(
-                              jsonEncode({"event": "prize", "message": value}));
+                          channel.sink.add(jsonEncode(
+                              {"event": "prize", "message": value.tojson()}));
                         });
                       });
                       setState(() {

@@ -100,7 +100,7 @@ class _SurveyFormState extends State<SurveyForm> {
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text(
-                              'It seems you are no where near the school, you need to be around the school to take this photo')));
+                              'Inaonekana haupo katika eneo la shule, tafadhali piga picha ya shule yako')));
                     }
                   }
                 },

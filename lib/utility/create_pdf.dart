@@ -54,12 +54,11 @@ void createPDF(List<dynamic> data, BuildContext buildcontext) {
 }
 
 Future<String> savePDF() async {
-  final tempDir = await getExternalStorageDirectory();
-  print(tempDir!.path);
-  String path = tempDir.path.split('Android')[0] + 'Download';
-  print(path);
-  final file = File('$path/swash.pdf');
+  //final tempDir = await getExternalStorageDirectory();
+  String tempDir = '/storage/emulated/0/Download/';
+
+  // String path = tempDir.path.split('Android')[0] + 'Download';
+  final file = File('${tempDir}swash.pdf');
   await file.writeAsBytes(await pdf.save());
-  String s = 'Android';
-  return path;
+  return tempDir + 'swash.pdf';
 }

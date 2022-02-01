@@ -5,7 +5,7 @@ import 'package:http/http.dart';
 import 'dart:convert';
 
 Future<bool> isTherePrize() async {
-  Response response = await get(
+  Response response = await post(
     Uri.parse('${AppPath.domain}/prize.php'),
   );
 
@@ -14,6 +14,7 @@ Future<bool> isTherePrize() async {
     if (data['status']) {
       return true;
     } else {
+      // print(data['message']);
       return false;
     }
   } else {

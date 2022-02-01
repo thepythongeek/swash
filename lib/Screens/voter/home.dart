@@ -52,6 +52,9 @@ class _VoterState extends State<Voter> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     AppStateManager appStateManager =
         Provider.of<AppStateManager>(context, listen: false);
+    ProfileManager profileManager =
+        Provider.of<ProfileManager>(context, listen: false);
+    print(appStateManager.prize.runtimeType);
     return DefaultTabController(
       initialIndex: 0,
       length: 4,
@@ -69,18 +72,32 @@ class _VoterState extends State<Voter> with SingleTickerProviderStateMixin {
             StreamBuilder<dynamic>(
                 stream: appStateManager.channelStream,
                 builder: (context, snapshot) {
-                  bool alerts;
+                  bool alerts = false;
+                  Map<String, dynamic>? data;
+                  Winner? winner;
 
                   if (snapshot.hasData) {
-                    Map<String, dynamic> data = jsonDecode(snapshot.data);
+                    data = jsonDecode(snapshot.data);
                     print(data);
-                    alerts = true;
+
+                    if (data!['event'] == 'prize') {
+                      alerts = true;
+                      winner = Winner.fromjson(data['message']);
+                      print(winner.name);
+                    }
                   } else {
                     //  ScaffoldMessenger.of(context).showSnackBar(
                     //   SnackBar(content: Text('${snapshot.data}')));
                     alerts = false;
                   }
-                  return BellIcon(alerts: alerts);
+                  print(winner?.getMessage(
+                      profileManager.user!.role, profileManager.user!.id));
+                  return BellIcon(
+                      alerts: alerts,
+                      message: winner != null
+                          ? winner.getMessage(profileManager.user!.role,
+                              profileManager.user!.id)
+                          : '');
                 })
           ],
           bottom: const TabBar(
@@ -167,18 +184,37 @@ class _AnimatedButtonState extends State<AnimatedButton> {
 
 class BellIcon extends StatefulWidget {
   final bool alerts;
-  const BellIcon({Key? key, required this.alerts}) : super(key: key);
+  final String message;
+  const BellIcon({Key? key, required this.alerts, required this.message})
+      : super(key: key);
 
   @override
   _BellIconState createState() => _BellIconState();
 }
 
 class _BellIconState extends State<BellIcon> {
+  bool exit = false;
   @override
   Widget build(BuildContext context) {
-    return Icon(
-      Icons.notifications,
-      color: widget.alerts ? Colors.white : Colors.blue,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: InkWell(
+        onTap: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  content: ListTile(
+                    title: Text(widget.message),
+                  ),
+                );
+              });
+        },
+        child: Icon(
+          Icons.notifications,
+          color: widget.alerts ? Colors.orange : Colors.white,
+        ),
+      ),
     );
   }
 }

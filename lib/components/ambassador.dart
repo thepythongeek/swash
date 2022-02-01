@@ -45,6 +45,7 @@ class _AmbassadorState extends State<Ambassador> {
         ),
         Consumer<CompetitionManager>(
             builder: (context, competitionManager, child) {
+          print(competitionManager.loading);
           if (competitionManager.loading) {
             return SizedBox(
               height: MediaQuery.of(context).size.height,

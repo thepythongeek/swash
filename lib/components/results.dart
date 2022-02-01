@@ -108,7 +108,7 @@ class _ResultsPageState extends State<Results> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
+      /* floatingActionButton: FloatingActionButton(
         child: Icon(Icons.download),
         onPressed: () {
           if (Provider.of<CompetitionManager>(context, listen: false).school !=
@@ -118,7 +118,7 @@ class _ResultsPageState extends State<Results> {
                 context);
           }
         },
-      ),
+      ),*/
       body: Column(children: <Widget>[
         const ListTile(title: Text('Challenge Results')),
         const DropDown(),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:swash/components/loading_button.dart';
 import 'package:swash/components/media.dart';
 import 'package:swash/object/new_env_status.dart';
 import '../../models/models.dart';
@@ -84,16 +85,15 @@ class _ReportEnvironmentStatusState extends State<ReportEnvironmentStatus> {
                     decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(20)),
-                    child: TextButton(
-                      onPressed: () {
+                    child: LoadingButton(
+                      function: () async {
                         // send data
-                        createNewEnvStatus(
-                                image: env.image,
-                                status: _value!,
-                                userId: profileManager.user!.id,
-                                description: descr.text,
-                                locationName: location.text)
-                            .then((value) => {});
+                        await createNewEnvStatus(
+                            image: env.image,
+                            status: _value!,
+                            userId: profileManager.user!.id,
+                            description: descr.text,
+                            locationName: location.text);
                       },
                       child: const Text(
                         'Report',

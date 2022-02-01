@@ -17,3 +17,4 @@ export 'views.dart';
 export 'comment_manager.dart';
 export 'conversations.dart';
 export 'conversations_manager.dart';
+export 'winner.dart';

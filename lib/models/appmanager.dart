@@ -1,3 +1,4 @@
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:swash/Screens/School/dashboard.dart';
 import 'package:swash/Screens/community/dashboard.dart';
@@ -45,7 +46,7 @@ class AppStateManager extends ChangeNotifier {
     _currentTab = index;
   }
 
-  void addPrize(Prize value) {
+  void addPrize(Prize? value) {
     _prize = value;
   }
 
@@ -200,6 +201,8 @@ class ProfileManager extends ChangeNotifier {
   void logout() {
     _user = null;
     _isLoggedIn = false;
+    final storage = FlutterSecureStorage();
+    storage.deleteAll();
   }
 
   void addUser(User user) {
