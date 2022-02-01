@@ -1,3 +1,5 @@
+import 'package:swash/components/loading_button.dart';
+
 import 'auth.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -111,8 +113,8 @@ class _LoginPageState extends State<LoginPage> {
                   decoration: BoxDecoration(
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(20)),
-                  child: TextButton(
-                    onPressed: () async {
+                  child: LoadingButton(
+                    function: () async {
                       if (_formKey.currentState!.validate()) {
                         var _response = await postSignin(
                             userNameController.text,
@@ -129,11 +131,11 @@ class _LoginPageState extends State<LoginPage> {
 
                           // get user profile if he has one
 
-                          getProfile(_response['message']['user_id'], "null")
-                              .then((value) {
-                            profileManager.updateprofile(value.profile);
-                            print(profileManager.user!.profile!.name);
-                          });
+                          var value = await getProfile(
+                              _response['message']['user_id'], "null");
+
+                          profileManager.updateprofile(value.profile);
+                          print(profileManager.user!.profile!.name);
 
                           // store the user id and role
                           FlutterSecureStorage storage = FlutterSecureStorage();

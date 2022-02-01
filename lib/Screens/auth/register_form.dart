@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:swash/components/components.dart';
 import 'package:swash/models/models.dart';
 import 'package:swash/object/register.dart';
 import 'package:provider/provider.dart';
@@ -215,56 +216,54 @@ class _UserRegisterState extends State<UserRegister> {
                   decoration: BoxDecoration(
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(20)),
-                  child: TextButton(
-                    onPressed: () {
-                      register(
-                              phone: phonecontroller.text,
-                              email: emailcontroller.text,
-                              location: locationcontroller.text,
-                              password: passwordcontroller.text,
-                              fullName: namecontroller.text,
-                              schoolName: schoolcontroller.text)
-                          .then((value) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                                content: Text('Usajili umefanikiwa')));
-                        // add user to the app state
+                  child: LoadingButton(
+                    function: () async {
+                      var value = await register(
+                          phone: phonecontroller.text,
+                          email: emailcontroller.text,
+                          location: locationcontroller.text,
+                          password: passwordcontroller.text,
+                          fullName: namecontroller.text,
+                          schoolName: schoolcontroller.text);
+
+                      ScaffoldMessenger.of(context)
+                          .showSnackBar(SnackBar(content: Text(value.message)));
+                      // add user to the app state
+                      Provider.of<ProfileManager>(context, listen: false)
+                          .addUser(User(
+                              role: value.role, id: value.userId.toString()));
+
+                      getProfile(value.userId, "null").then((value) {
                         Provider.of<ProfileManager>(context, listen: false)
-                            .addUser(User(
-                                role: value.role, id: value.userId.toString()));
-
-                        getProfile(value.userId, "null").then((value) {
-                          Provider.of<ProfileManager>(context, listen: false)
-                              .updateprofile(value.profile);
-                        });
-
-                        // store the user id and role
-                        FlutterSecureStorage storage = FlutterSecureStorage();
-                        storage.write(
-                          key: 'id',
-                          value: value.userId,
-                        );
-                        storage.write(key: 'role', value: value.role);
-
-                        AppStateManager appStatemanager =
-                            Provider.of<AppStateManager>(context,
-                                listen: false);
-                        switch (value.role) {
-                          case "ward":
-                            appStatemanager.goto(MyPages.ward, true);
-                            break;
-                          case "voter":
-                          case "admin":
-                            appStatemanager.goto(MyPages.voter, true);
-                            appStatemanager.goto(MyPages.register, false);
-
-                            break;
-                          case "teacher":
-                            appStatemanager.goto(MyPages.school, true);
-                            break;
-                        }
-                        //  appStatemanager.goto(MyPages.redirect, true);
+                            .updateprofile(value.profile);
                       });
+
+                      // store the user id and role
+                      FlutterSecureStorage storage = FlutterSecureStorage();
+                      storage.write(
+                        key: 'id',
+                        value: value.userId,
+                      );
+                      storage.write(key: 'role', value: value.role);
+
+                      AppStateManager appStatemanager =
+                          Provider.of<AppStateManager>(context, listen: false);
+                      switch (value.role) {
+                        case "ward":
+                          appStatemanager.goto(MyPages.ward, true);
+                          break;
+                        case "voter":
+                        case "admin":
+                          appStatemanager.goto(MyPages.voter, true);
+                          appStatemanager.goto(MyPages.register, false);
+
+                          break;
+                        case "teacher":
+                          appStatemanager.goto(MyPages.school, true);
+                          break;
+
+                        //  appStatemanager.goto(MyPages.redirect, true);
+                      }
                     },
                     child: const Text(
                       'Register',
