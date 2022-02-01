@@ -174,7 +174,7 @@ class _AnimatedButtonState extends State<AnimatedButton> {
             child: Transform.rotate(
                 angle: (widget.animation.value / 360) * (2 * pi),
                 child: Image.asset(
-                  'images/gift.jpg',
+                  'images/gift.png',
                   fit: BoxFit.fill,
                 )),
           );

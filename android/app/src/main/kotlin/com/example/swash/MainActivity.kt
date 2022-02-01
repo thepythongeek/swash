@@ -1,4 +1,4 @@
-package com.example.swash
+package com.swashcompetition.v2
 
 import io.flutter.embedding.android.FlutterActivity
 
