@@ -209,7 +209,8 @@ class _EventFormState extends State<EventForm> {
   }
 
   Future<XFile?> chooseImage({required ImageSource source}) async {
-    XFile? choosedimage = await _imagePicker.pickImage(source: source);
+    XFile? choosedimage =
+        await _imagePicker.pickImage(source: source, imageQuality: 50);
     return choosedimage;
   }
 }

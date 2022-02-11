@@ -1,3 +1,5 @@
+import 'package:swash/exceptions/network.dart';
+
 import '../models/models.dart';
 import '../path.dart';
 import 'dart:convert';
@@ -17,7 +19,7 @@ Future<GetProfile> getProfile(String? userId, String followingId) async {
   if (response.statusCode == 200) {
     return GetProfile.fromJson(json.decode(response.body));
   } else {
-    return Toasty().show(
-        'Somethings went wrong.', Toast.LENGTH_SHORT, ToastGravity.BOTTOM);
+    print(response.body);
+    return Future.error(NetworkError(msg: 'Something went wrong'));
   }
 }

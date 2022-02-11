@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:provider/provider.dart';
 import 'package:swash/components/upload.dart';
+import 'package:swash/exceptions/network.dart';
 import 'package:swash/models/models.dart';
 import 'package:swash/models/prize.dart';
 import 'package:swash/object/get_profile.dart';
@@ -59,30 +60,38 @@ class _SplashScreenState extends State<SplashScreen> {
       profileManager.loginUser();
 
       // get user profile if he has one
-      GetProfile profile = await getProfile(keys['id']!, "null");
-      profileManager.updateprofile(profile.profile);
+      try {
+        GetProfile profile = await getProfile(keys['id']!, "null");
+        profileManager.updateprofile(profile.profile);
 
-      Timer(const Duration(seconds: 1), () {
-        AppStateManager appStateManager =
-            Provider.of<AppStateManager>(context, listen: false);
-        appStateManager.initiliase();
-        // move to different screens depending
-        // on user role
-        switch (keys['role']) {
-          case "ward":
-            appStateManager.goto(MyPages.ward, true);
-            break;
-          case "voter":
-          case "admin":
-            appStateManager.goto(MyPages.voter, true);
-            appStateManager.goto(MyPages.login, false);
+        Timer(const Duration(seconds: 1), () {
+          AppStateManager appStateManager =
+              Provider.of<AppStateManager>(context, listen: false);
+          appStateManager.initiliase();
+          // move to different screens depending
+          // on user role
+          switch (keys['role']) {
+            case "ward":
+              appStateManager.goto(MyPages.ward, true);
+              break;
+            case "voter":
+            case "admin":
+              appStateManager.goto(MyPages.voter, true);
+              appStateManager.goto(MyPages.login, false);
 
-            break;
-          case "teacher":
-            appStateManager.goto(MyPages.school, true);
-            break;
-        }
-      });
+              break;
+            case "teacher":
+              appStateManager.goto(MyPages.school, true);
+              break;
+          }
+        });
+      } on NetworkError catch (e) {
+        Provider.of<AppStateManager>(context, listen: false).initiliase();
+        Provider.of<AppStateManager>(context, listen: false)
+            .goto(MyPages.home, true);
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
   }
 
