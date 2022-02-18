@@ -70,7 +70,7 @@ class _MediaState extends State<Media> {
     } else if (isMultiImage) {
       await onPickMultiImage();
     } else {
-      await onPickImage(source: source);
+      await onPickImage();
     }
   }
 
@@ -153,21 +153,14 @@ class _MediaState extends State<Media> {
         label: 'Image picker',
       );
     } else {
-      return Container(
-        width: 15,
-        decoration: BoxDecoration(
-          color: Colors.green,
-          border: Border.all(width: .5, color: Colors.white),
-          borderRadius: BorderRadius.circular(50),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(0),
-          child: IconButton(
-              color: Colors.white,
-              onPressed: onPickMultiImage,
-              icon: const Icon(Icons.add)),
-        ),
-      );
+      return ElevatedButton(
+          style: ButtonStyle(
+            backgroundColor: MaterialStateProperty.all(Colors.green),
+            minimumSize: MaterialStateProperty.all(Size.fromRadius(20)),
+            shape: MaterialStateProperty.all(CircleBorder()),
+          ),
+          onPressed: onPickImage,
+          child: Icon(Icons.add));
     }
   }
 
@@ -274,12 +267,11 @@ class _MediaState extends State<Media> {
   }
 
   Future<void> onPickImage({
-    required ImageSource source,
     int? quality = 40,
   }) async {
     try {
-      final pickedFile =
-          await _picker.pickImage(source: source, imageQuality: quality);
+      final pickedFile = await _picker.pickImage(
+          source: ImageSource.gallery, imageQuality: quality);
       setState(() {
         _imageFile = pickedFile;
       });

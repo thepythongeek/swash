@@ -108,7 +108,7 @@ class _ResultsPageState extends State<Results> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /* floatingActionButton: FloatingActionButton(
+      floatingActionButton: FloatingActionButton(
         child: Icon(Icons.download),
         onPressed: () {
           if (Provider.of<CompetitionManager>(context, listen: false).school !=
@@ -118,46 +118,12 @@ class _ResultsPageState extends State<Results> {
                 context);
           }
         },
-      ),*/
-      body: Column(children: <Widget>[
+      ),
+      body: Column(mainAxisSize: MainAxisSize.min, children: <Widget>[
         const ListTile(title: Text('Challenge Results')),
-        const DropDown(),
-        Consumer<CompetitionManager>(
-          builder: (context, competitionManager, child) {
-            //print(competitionManager.school!);
-            return FittedBox(
-                child: DataTable(
-                    columns: const [
-                  DataColumn(label: Text('No')),
-                  DataColumn(label: Text('School Name')),
-                  DataColumn(label: Text('Built')),
-                  DataColumn(label: Text('Score/100')),
-                  DataColumn(label: Text('Status'))
-                ],
-                    rows: competitionManager.loading
-                        ? []
-                        : buildRows(competitionManager.school!)));
-          },
-        )
+        const ButtonWidget(),
+        Flexible(child: ScrollingTable())
       ]),
     );
-  }
-
-  List<DataRow> buildRows(List schools) {
-    int count = 1;
-    List<DataRow> rows = [];
-    for (var school in schools) {
-      print(school);
-      rows.add(DataRow(cells: [
-        DataCell(Text('${count++}')),
-        DataCell(Text(school['school_name'])),
-        DataCell(Text(school['built'] ?? '-')),
-        DataCell(Text(double.parse(school['score']).round().toString())),
-        DataCell(
-          Rating(rating: findRating(school['score'])),
-        ),
-      ]));
-    }
-    return rows;
   }
 }

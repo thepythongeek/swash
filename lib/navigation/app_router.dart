@@ -3,7 +3,6 @@ import 'package:swash/Screens/School/dashboard.dart';
 import 'package:swash/Screens/Ward/dashboard.dart';
 import 'package:swash/Screens/Ward/school.dart';
 import 'package:swash/Screens/auth/auth.dart';
-import 'package:swash/Screens/auth/signin.dart';
 import 'package:swash/Screens/splash_screen.dart';
 import 'package:swash/Screens/voter/addevent.dart';
 import 'package:swash/components/challengedetail.dart';

@@ -98,7 +98,7 @@ class Posts {
         totalLikes: int.parse(json['total_likes']),
         totalViews: int.parse(json['total_views']),
         isExpert: json['is_expert'],
-        imageLink: json['image_link'],
+        imageLink: json['image_link'] ?? 'none',
         profilePic: json['profile_pic'] ?? '',
         totalComments: int.parse(json['total_comments']),
         commentStatus: json['comment_status'],

@@ -9,8 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:swash/models/prize.dart';
 import 'package:web_socket_channel/io.dart';
 import '../Screens/front_page.dart';
-import '../Screens/auth/login_form.dart';
-import '../Screens/auth/signin.dart';
 
 class AppStateManager extends ChangeNotifier {
   final NavigationState _navigationState = NavigationState();

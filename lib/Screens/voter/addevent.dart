@@ -1,53 +1,18 @@
 import 'dart:io';
-import 'dart:convert';
+
 import 'package:image_picker/image_picker.dart';
 import 'package:swash/components/components.dart';
-import 'package:video_player/video_player.dart';
 import 'package:http_parser/http_parser.dart';
-import '../../path.dart';
-import 'package:path/path.dart';
+import 'package:swash/utility/compress_video.dart';
+import 'package:video_compress/video_compress.dart';
 import '../../models/models.dart';
-import "package:async/async.dart";
 import 'package:swash/toasty.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import '../../object/post_event.dart';
 import 'package:provider/provider.dart';
 import 'package:swash/models/models.dart';
-import '../../components/mediaplayer.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
-Future postEvent(
-    {required String title,
-    required String descriptions,
-    required var multipartFile,
-    required String mediaType,
-    String duration = '',
-    required String userID}) async {
-  var request = http.MultipartRequest(
-      "POST", Uri.parse('${AppPath.domain}/post_event.php'));
-
-  request.files.add(multipartFile);
-  request.fields['user_id'] = userID;
-  request.fields['duration'] = duration;
-  request.fields['title'] = title;
-  request.fields['descriptions'] = descriptions;
-  request.fields['media_type'] = mediaType;
-
-  var response = await request.send();
-  if (response.statusCode == 200) {
-    var resp = await response.stream.bytesToString();
-    print(resp);
-    var data = jsonDecode(resp);
-
-    if (data['status'] == true) {
-      Toasty().show(data['message'], Toast.LENGTH_SHORT, ToastGravity.TOP);
-    } else {
-      Toasty().show(data['message'], Toast.LENGTH_SHORT, ToastGravity.TOP);
-    }
-  } else {
-    Toasty().show("Failed to ", Toast.LENGTH_SHORT, ToastGravity.TOP);
-  }
-}
 
 class EventForm extends StatefulWidget {
   static MaterialPage page() {
@@ -86,7 +51,7 @@ class _EventFormState extends State<EventForm> {
                 context: context,
                 builder: (context) {
                   return SizedBox(
-                    height: MediaQuery.of(context).size.height / 4,
+                    height: MediaQuery.of(context).size.height / 4 + 60,
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -97,32 +62,48 @@ class _EventFormState extends State<EventForm> {
                               fileManager.reset();
                               XFile? file = await chooseImage(
                                   source: ImageSource.gallery);
-                              fileManager.addFile(file!);
+                              fileManager.addXFile(file!);
                               Navigator.pop(context);
                             },
                             child: Text('Gallery'),
                           ),
                           ElevatedButton(
                             onPressed: () async {
+                              Navigator.pop(context);
                               fileManager.reset();
                               XFile? file =
                                   await chooseImage(source: ImageSource.camera);
-                              fileManager.addFile(file!);
-                              Navigator.pop(context);
+                              fileManager.addXFile(file!);
                             },
                             child: Text('camera'),
                           ),
                           ElevatedButton(
                             onPressed: () async {
+                              Navigator.pop(context);
+
+                              /// check if is greater than maximum upload size
+                              /// if it is compress it
                               fileManager.reset();
                               XFile? file = await _imagePicker.pickVideo(
                                   source: ImageSource.camera,
                                   maxDuration: const Duration(seconds: 30));
-                              fileManager.addFile(file!);
-                              fileManager.showVideo();
-                              Navigator.pop(context);
+                              await _processVideo(file, fileManager, context);
                             },
-                            child: Text('video'),
+                            child: Text('video from camera'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+
+                              /// check if is greater than maximum upload size
+                              /// if it is compress it
+                              fileManager.reset();
+                              XFile? file = await _imagePicker.pickVideo(
+                                  source: ImageSource.gallery,
+                                  maxDuration: const Duration(seconds: 30));
+                              await _processVideo(file, fileManager, context);
+                            },
+                            child: Text('video from gallery'),
                           ),
                         ],
                       ),
@@ -158,7 +139,11 @@ class _EventFormState extends State<EventForm> {
                   ),
                   Consumer<FileManager>(builder: (context, manager, child) {
                     return MediaPlayer(
-                      file: manager.file,
+                      file: manager.file != null
+                          ? manager.file
+                          : manager.xfile != null
+                              ? File(manager.xfile!.path)
+                              : null,
                       isVideo: manager.video,
                     );
                   }),
@@ -172,14 +157,24 @@ class _EventFormState extends State<EventForm> {
                       child: LoadingButton(
                         child: Text('Submit'),
                         function: () async {
-                          http.MultipartFile multipartFile;
-                          if (fileManager.video == 'video') {
+                          http.MultipartFile? multipartFile;
+                          if (fileManager.video) {
                             multipartFile = await http.MultipartFile.fromPath(
-                                'image', fileManager.file!.path,
+                                'image',
+                                fileManager.file != null
+                                    ? fileManager.file!.path
+                                    : fileManager.xfile!.path,
                                 contentType: MediaType('video', 'mp4'));
-                          } else {
+                          } else if (fileManager.file != null ||
+                              fileManager.xfile != null) {
                             multipartFile = await http.MultipartFile.fromPath(
-                                'image', fileManager.file!.path);
+                              'image',
+                              fileManager.file != null
+                                  ? fileManager.file!.path
+                                  : fileManager.xfile!.path,
+                            );
+                          } else {
+                            multipartFile = null;
                           }
 
                           final title = titleController.text;
@@ -206,6 +201,26 @@ class _EventFormState extends State<EventForm> {
                 ],
               ),
             )));
+  }
+
+  Future<void> _processVideo(
+      XFile? file, FileManager fileManager, BuildContext context) async {
+    try {
+      File data = await uploadVideo(file!);
+      fileManager.addFile(data);
+      fileManager.showVideo();
+    } on FileStillBig catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          duration: Duration(seconds: 6),
+          content:
+              Text('Imeshindwa kutuma video, pungunza muda wa video hii')));
+    } on CompressionError catch (e) {
+      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          duration: Duration(seconds: 6),
+          content: Text('hitilafu imetokea jaribu video nyingine')));
+    }
   }
 
   Future<XFile?> chooseImage({required ImageSource source}) async {

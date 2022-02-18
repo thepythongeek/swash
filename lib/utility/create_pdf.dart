@@ -46,19 +46,17 @@ void createPDF(List<dynamic> data, BuildContext buildcontext) {
       }));
   savePDF().then((value) {
     ScaffoldMessenger.of(buildcontext)
-        .showSnackBar(const SnackBar(content: Text('table downloaded')));
+        .showSnackBar(SnackBar(content: Text(value)));
   }).catchError((error) {
+    print(error);
     ScaffoldMessenger.of(buildcontext)
         .showSnackBar(SnackBar(content: Text('$error')));
   });
 }
 
 Future<String> savePDF() async {
-  //final tempDir = await getExternalStorageDirectory();
-  String tempDir = '/storage/emulated/0/Download/';
-
-  // String path = tempDir.path.split('Android')[0] + 'Download';
-  final file = File('${tempDir}swash.pdf');
+  final tempDir = '/storage/emulated/0/Download/';
+  final file = File('${tempDir + "swash.pdf"}');
   await file.writeAsBytes(await pdf.save());
-  return tempDir + 'swash.pdf';
+  return 'Pdf file saved in ${tempDir + "swash.pdf"}';
 }

@@ -1,3 +1,4 @@
+import 'package:swash/components/components.dart';
 import 'package:swash/components/loading_button.dart';
 
 import 'auth.dart';
@@ -92,20 +93,7 @@ class _LoginPageState extends State<LoginPage> {
                 ),
                 Container(
                   padding: const EdgeInsets.all(10),
-                  child: TextFormField(
-                    controller: passwordController,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(35)),
-                      labelText: 'Enter a password',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty || value.length < 4) {
-                        return "Password with at least 4 character is allowed";
-                      }
-                      return null;
-                    },
-                  ),
+                  child: PasswordField(passwordController: passwordController),
                 ),
                 Container(
                   height: 50,

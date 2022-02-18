@@ -101,8 +101,7 @@ class _VoterState extends State<Voter> with SingleTickerProviderStateMixin {
                 })
           ],
           bottom: const TabBar(
-            isScrollable: true,
-            labelPadding: EdgeInsets.all(9),
+            labelPadding: EdgeInsets.all(1),
             tabs: [
               Text(
                 'VOTE',

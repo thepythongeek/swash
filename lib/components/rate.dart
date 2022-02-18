@@ -13,10 +13,16 @@ class _RatingState extends State<Rating> {
   Widget build(BuildContext context) {
     int remaining = 4 - widget.rating;
     return Row(
-      children:
-          List.generate(widget.rating, (index) => const Icon(Icons.star)) +
-              List.generate(
-                  remaining, (index) => const Icon(Icons.star_border_outlined)),
+      children: List.generate(
+              widget.rating,
+              (index) => Icon(
+                    Icons.star,
+                  )) +
+          List.generate(
+              remaining,
+              (index) => Icon(
+                    Icons.star_border_outlined,
+                  )),
     );
   }
 }

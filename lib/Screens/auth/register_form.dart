@@ -185,31 +185,9 @@ class _UserRegisterState extends State<UserRegister> {
                 ),
                 //password
                 Container(
-                  padding: const EdgeInsets.all(10),
-                  child: TextFormField(
-                    validator: (str) {
-                      if (str == null || str.isEmpty) {
-                        return 'Field cannot be empty';
-                      }
-                      return null;
-                    },
-                    textInputAction: TextInputAction.next,
-                    controller: passwordcontroller,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(35)),
-                      labelText: ' Password',
-                      suffixIcon: IconButton(
-                        icon: isPasswordVisible
-                            ? const Icon(Icons.visibility_off)
-                            : const Icon(Icons.visibility),
-                        onPressed: () => setState(
-                            () => isPasswordVisible = !isPasswordVisible),
-                      ),
-                    ),
-                    obscureText: isPasswordVisible,
-                  ),
-                ),
+                    padding: const EdgeInsets.all(10),
+                    child:
+                        PasswordField(passwordController: passwordcontroller)),
                 Container(
                   height: 50,
                   width: 250,

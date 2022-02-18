@@ -105,9 +105,7 @@ class _ChatListState extends State<ChatList> {
                                   conversation: conversation![index],
                                 ));
                       } else {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return Container();
                       }
                     }))));
   }

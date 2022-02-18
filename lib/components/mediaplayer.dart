@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 import '../path.dart';
 
 class MediaPlayer extends StatefulWidget {
-  final XFile? file;
+  final File? file;
   final bool isVideo;
   const MediaPlayer({Key? key, required this.file, this.isVideo = false})
       : super(key: key);
@@ -34,14 +34,16 @@ class _MediaPlayerState extends State<MediaPlayer> {
   }
 
   Widget showMedia({
-    XFile? file,
+    File? file,
     required bool isVideo,
   }) {
+    print(file);
+    print(isVideo);
     if (file != null && !isVideo) {
       return SizedBox(
         height: 150,
         child: Image.file(
-          File(file.path),
+          file,
           fit: BoxFit.contain,
         ),
       );
@@ -71,9 +73,9 @@ class _MediaPlayerState extends State<MediaPlayer> {
   }
 
   Future playVideo(
-    XFile? file,
+    File? file,
   ) async {
-    _controller = VideoPlayerController.file(File(file!.path));
+    _controller = VideoPlayerController.file(file!);
     double volume = 1.0;
     await _controller!.initialize();
     await _controller!.setVolume(volume);

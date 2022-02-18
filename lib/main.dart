@@ -49,8 +49,7 @@ class _MyAppState extends State<MyApp> {
         fileManager: fileManager,
         postmanager: postmanager,
         themeManager: themeManager);
-    channel = IOWebSocketChannel.connect(
-        Uri.parse('ws://www.swashcompetition.com:8080'));
+    channel = IOWebSocketChannel.connect(Uri.parse(AppPath.localsocket));
     channelStream = channel.stream.asBroadcastStream();
     appStateManager.addStream(channel, channelStream);
     super.initState();

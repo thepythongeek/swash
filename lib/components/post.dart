@@ -115,38 +115,39 @@ class _PostState extends State<Post> {
                           )
                         ],
                       )),
-                      Expanded(
-                          child: ClipRRect(
-                        child: widget.post.mediaType == 'video' //&& _play
-                            ? MediaPlayer(fileUrl: widget.post.imageLink)
-                            : AspectRatio(
-                                aspectRatio: 4 / 3,
-                                child: CachedNetworkImage(
-                                  memCacheHeight: 400,
-                                  imageUrl: widget.post.imageLink
-                                          .startsWith('http')
-                                      ? widget.post.imageLink
-                                      : '${AppPath.domain}/${widget.post.imageLink}',
-                                  progressIndicatorBuilder:
-                                      (context, url, downloadProgress) {
-                                    return Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        CircularProgressIndicator(
-                                          value: downloadProgress.progress,
-                                        ),
-                                        const Text('Loading Image...')
-                                      ],
-                                    );
-                                  },
-                                  errorWidget: (context, object, stacktrace) {
-                                    return const Icon(Icons.error);
-                                  },
-                                  fit: BoxFit.cover,
+                      if (widget.post.mediaType != 'none')
+                        Expanded(
+                            child: ClipRRect(
+                          child: widget.post.mediaType == 'video' //&& _play
+                              ? MediaPlayer(fileUrl: widget.post.imageLink)
+                              : AspectRatio(
+                                  aspectRatio: 4 / 3,
+                                  child: CachedNetworkImage(
+                                    memCacheHeight: 400,
+                                    imageUrl: widget.post.imageLink
+                                            .startsWith('http')
+                                        ? widget.post.imageLink
+                                        : '${AppPath.domain}/${widget.post.imageLink}',
+                                    progressIndicatorBuilder:
+                                        (context, url, downloadProgress) {
+                                      return Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          CircularProgressIndicator(
+                                            value: downloadProgress.progress,
+                                          ),
+                                          const Text('Loading Image...')
+                                        ],
+                                      );
+                                    },
+                                    errorWidget: (context, object, stacktrace) {
+                                      return const Icon(Icons.error);
+                                    },
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
-                              ),
-                      ))
+                        ))
                     ],
                   ),
                 ),

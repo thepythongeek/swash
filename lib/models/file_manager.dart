@@ -6,14 +6,22 @@ import 'package:flutter/material.dart';
 import 'package:swash/models/models.dart';
 
 class FileManager extends ChangeNotifier {
-  XFile? _file;
+  XFile? _xfile;
+  File? _file;
   bool _video = false;
 
-  XFile? get file => _file;
+  XFile? get xfile => _xfile;
+  File? get file => _file;
+
   get video => _video;
 
-  void addFile(XFile file) {
+  void addFile(File file) {
     _file = file;
+    notifyListeners();
+  }
+
+  void addXFile(XFile file) {
+    _xfile = file;
     notifyListeners();
   }
 
@@ -23,6 +31,7 @@ class FileManager extends ChangeNotifier {
 
   void reset() {
     _file = null;
+    _xfile = null;
     _video = false;
     notifyListeners();
   }
